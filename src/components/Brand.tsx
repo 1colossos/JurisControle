@@ -1,19 +1,19 @@
 import { cn } from "@/lib/cn";
 
-/** Logotipo do JurisControl (balança da justiça estilizada). */
+// BASE_URL respeita o subdiretório "/JurisControl/" usado no GitHub Pages.
+const logoSrc = `${import.meta.env.BASE_URL}logo-512.png`;
+
+/** Logotipo do JurisControl (monograma JC com balança da justiça). */
 export function Logo({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" className="shrink-0">
-      <rect width="64" height="64" rx="16" fill="#e0a83a" />
-      <g fill="#16213e">
-        <rect x="30.5" y="14" width="3" height="36" rx="1.5" />
-        <circle cx="32" cy="13" r="3.4" />
-        <path d="M20 22l-6 12c0 3.3 2.7 6 6 6s6-2.7 6-6l-6-12z" />
-        <path d="M44 22l-6 12c0 3.3 2.7 6 6 6s6-2.7 6-6l-6-12z" />
-        <rect x="14" y="50" width="36" height="4" rx="2" />
-        <rect x="20" y="20" width="24" height="3" rx="1.5" />
-      </g>
-    </svg>
+    <img
+      src={logoSrc}
+      width={size}
+      height={size}
+      alt="JurisControl"
+      className="shrink-0"
+      style={{ width: size, height: size }}
+    />
   );
 }
 
