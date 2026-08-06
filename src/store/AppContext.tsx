@@ -99,7 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             timeline: [
               {
                 data: p.termoInicial,
-                titulo: "Cadastro no JurisControl",
+                titulo: "Cadastro no JurisControle",
                 desc: "Processo cadastrado e prazo posto em monitoramento.",
                 done: true,
               },

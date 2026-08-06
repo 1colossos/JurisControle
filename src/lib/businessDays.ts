@@ -1,6 +1,6 @@
 /* ============================================================
    Motor de contagem de prazos em DIAS ÚTEIS — o coração do
-   JurisControl. Considera fins de semana, feriados nacionais e
+   JurisControle. Considera fins de semana, feriados nacionais e
    feriados/suspensões regionais (MA / São Luís / Itapecuru-Mirim).
    Implementação determinística (sem libs externas) e testável.
    ============================================================ */

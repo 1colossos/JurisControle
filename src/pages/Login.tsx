@@ -72,7 +72,7 @@ export function Login() {
           </div>
         </div>
 
-        <p className="relative text-xs text-white/40">© 2026 JurisControl. Todos os direitos reservados.</p>
+        <p className="relative text-xs text-white/40">© 2026 JurisControle. Todos os direitos reservados.</p>
       </div>
 
       {/* Formulário */}

@@ -24,7 +24,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Build (base /JurisControl/)
+      - name: Build (base /JurisControle/)
         run: npm run build
         env:
           GITHUB_PAGES: "true"

@@ -158,7 +158,7 @@ export function Configuracoes() {
           </div>
           <Toggle checked={alertas.email} onChange={(v) => setAlertas({ ...alertas, email: v })} label="Notificações por e-mail" desc="Envia lembretes de prazos pelo SMTP configurado" />
           <Toggle checked={alertas.whatsapp} onChange={(v) => setAlertas({ ...alertas, whatsapp: v })} label="Notificações por WhatsApp" desc="Dispara mensagens automáticas via Z-API" />
-          <Toggle checked={alertas.app} onChange={(v) => setAlertas({ ...alertas, app: v })} label="Notificações no aplicativo" desc="Alertas exibidos dentro do JurisControl" />
+          <Toggle checked={alertas.app} onChange={(v) => setAlertas({ ...alertas, app: v })} label="Notificações no aplicativo" desc="Alertas exibidos dentro do JurisControle" />
           <Toggle checked={alertas.criticos} onChange={(v) => setAlertas({ ...alertas, criticos: v })} label="Alerta extra para prazos críticos" desc="Reforça avisos quando faltam ≤ 3 dias úteis" />
           <Toggle checked={alertas.resumoDiario} onChange={(v) => setAlertas({ ...alertas, resumoDiario: v })} label="Resumo diário" desc="Recebe um panorama das pendências toda manhã" />
         </section>

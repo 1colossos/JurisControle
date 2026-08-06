@@ -1,9 +1,9 @@
 {
-  "name": "juriscontrol",
+  "name": "juriscontrole",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "JurisControl — Sistema web de controle e notificação de prazos processuais para advogados autônomos.",
+  "description": "JurisControle — Sistema web de controle e notificação de prazos processuais para advogados autônomos.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

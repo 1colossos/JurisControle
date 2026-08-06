@@ -1,8 +1,8 @@
-# JurisControl
+# JurisControle
 
 > Sistema web de controle e notificação de prazos processuais para advogados autônomos de São Luís e Itapecuru-Mirim/MA.
 
-JurisControl centraliza processos, clientes e prazos em um único ambiente, com **contagem automática em dias úteis**, **sinalização cromática de urgência** e **notificações automatizadas** por e-mail e WhatsApp — reduzindo o risco de perda de prazos.
+JurisControle centraliza processos, clientes e prazos em um único ambiente, com **contagem automática em dias úteis**, **sinalização cromática de urgência** e **notificações automatizadas** por e-mail e WhatsApp — reduzindo o risco de perda de prazos.
 
 Projeto desenvolvido para a disciplina de **Desenvolvimento Web** do curso de Análise e Desenvolvimento de Sistemas (UEMA — Campus Itapecuru-Mirim).
 
@@ -46,7 +46,7 @@ npm run preview  # pré-visualiza o build
 
 O deploy para o **GitHub Pages** é automático via GitHub Actions a cada push na `main`
 (ver [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). A aplicação fica
-disponível em `https://1colossos.github.io/JurisControl/`.
+disponível em `https://1colossos.github.io/JurisControle/`.
 
 > Os dados são fictícios (camada _mock_ em [`src/data/seed.ts`](src/data/seed.ts)) e servem
 > para demonstrar a interface; em produção, viriam de uma API/back-end.

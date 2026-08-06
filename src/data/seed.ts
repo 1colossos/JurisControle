@@ -1,5 +1,5 @@
 /* ============================================================
-   Camada de dados (mock) do JurisControl.
+   Camada de dados (mock) do JurisControle.
    Dados fictícios coerentes com o wireframe do TCC. Em produção,
    viriam de uma API/back-end. A urgência NÃO é fixa: é derivada
    dinamicamente pelo motor de dias úteis (lib/businessDays).
