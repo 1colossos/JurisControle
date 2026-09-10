@@ -9,11 +9,14 @@ import {
   Mail,
   MessageCircle,
   BellRing,
+  FileDown,
 } from "lucide-react";
 import { useApp } from "@/store/AppContext";
+import { useToast } from "@/components/ui/Toast";
 import { UrgencyBadge } from "@/components/ui/Badge";
 import { URGENCIA, ORDEM_URGENCIA } from "@/components/ui/urgency";
 import { formatarData, diasUteisLabel } from "@/lib/format";
+import { exportarDashboardPdf } from "@/lib/exportPdf";
 import { notificacoes } from "@/data/seed";
 
 const fade = (i: number) => ({
@@ -23,7 +26,18 @@ const fade = (i: number) => ({
 });
 
 export function Dashboard() {
-  const { processos } = useApp();
+  const { processos, usuario } = useApp();
+  const toast = useToast();
+
+  const exportar = () => {
+    const ok = exportarDashboardPdf(processos, usuario);
+    toast(
+      ok
+        ? "Dashboard aberto para exportação — escolha \"Salvar como PDF\"."
+        : "Não foi possível abrir a janela de exportação (pop-up bloqueado).",
+      ok ? "success" : "warning",
+    );
+  };
 
   const ativos = processos.filter((p) => p.status === "Em andamento").length;
   const criticos = processos.filter((p) => p.urgencia === "critico").length;
@@ -38,6 +52,12 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <button onClick={exportar} className="btn-primary">
+          <FileDown size={16} /> Exportar dashboard em PDF
+        </button>
+      </div>
+
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((k, i) => (

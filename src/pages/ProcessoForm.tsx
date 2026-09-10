@@ -1,31 +1,21 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, Save, CalendarClock, Info } from "lucide-react";
+import { ArrowLeft, Save, CalendarClock, Info, Scale } from "lucide-react";
 import { useApp } from "@/store/AppContext";
 import { useToast } from "@/components/ui/Toast";
 import { UrgencyBadge } from "@/components/ui/Badge";
 import { URGENCIA } from "@/components/ui/urgency";
-import { tiposProcesso } from "@/data/seed";
-import {
-  somarDiasUteis,
-  diasUteisAte,
-  classificarUrgencia,
-} from "@/lib/businessDays";
+import { tiposProcesso, HOJE_REF } from "@/data/seed";
+import { AREAS, regraPrazo, descreveRegra, calcularPrazoSugerido, type AreaProcesso } from "@/lib/prazos";
+import { diasUteisAte, classificarUrgencia } from "@/lib/businessDays";
+import { maskNumeroCNJ, validarNumeroCNJ } from "@/lib/validators";
 import { formatarData, diasUteisLabel } from "@/lib/format";
-import { HOJE_REF } from "@/data/seed";
-
-const PRAZOS_LEGAIS = [
-  { label: "Contestação (15 dias)", dias: 15 },
-  { label: "Recurso / Apelação (15 dias)", dias: 15 },
-  { label: "Embargos de declaração (5 dias)", dias: 5 },
-  { label: "Manifestação simples (5 dias)", dias: 5 },
-];
 
 const LEMBRETES = [1, 3, 7, 15];
 
 export function ProcessoForm() {
   const { id } = useParams();
-  const { clientes, addProcesso, updateProcesso, getProcesso } = useApp();
+  const { clientes, processos, addProcesso, updateProcesso, getProcesso } = useApp();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -34,23 +24,30 @@ export function ProcessoForm() {
 
   const [numero, setNumero] = useState(existente?.numero ?? "");
   const [clienteId, setClienteId] = useState(existente?.clienteId ?? clientes[0]?.id ?? "");
+  const [area, setArea] = useState<AreaProcesso>(existente?.area ?? "Cível");
   const [tipo, setTipo] = useState(existente?.tipo ?? tiposProcesso[0]);
   const [vara, setVara] = useState(existente?.vara ?? "");
   const [objeto, setObjeto] = useState(existente?.objeto ?? "");
   const [valor, setValor] = useState(String(existente?.valor ?? ""));
   const [termoInicial, setTermoInicial] = useState(existente?.termoInicial ?? HOJE_REF);
-  const [prazoLegal, setPrazoLegal] = useState(15);
   const [prazo, setPrazo] = useState(existente?.prazo ?? "");
   const [modoPrazo, setModoPrazo] = useState<"auto" | "manual">(editando ? "manual" : "auto");
   const [lembretes, setLembretes] = useState<number[]>(existente?.lembretes ?? [3, 7]);
   const [status, setStatus] = useState(existente?.status ?? "Em andamento");
+  const [erros, setErros] = useState<Record<string, string>>({});
 
-  // Prazo calculado em dias úteis a partir do termo inicial + prazo legal.
+  const ehPeticaoInicial = tipo === "Petição Inicial";
+
+  // Regra legal sugerida para o par tipo × área (pode não existir → manual).
+  const regra = useMemo(() => regraPrazo(tipo, area), [tipo, area]);
   const prazoCalculado = useMemo(
-    () => (termoInicial ? somarDiasUteis(termoInicial, prazoLegal) : ""),
-    [termoInicial, prazoLegal],
+    () => calcularPrazoSugerido(termoInicial, regra),
+    [termoInicial, regra],
   );
-  const prazoFinal = modoPrazo === "auto" ? prazoCalculado : prazo;
+
+  // Sem regra automática, força a referência manual.
+  const modoEfetivo = prazoCalculado === null ? "manual" : modoPrazo;
+  const prazoFinal = modoEfetivo === "auto" ? prazoCalculado ?? "" : prazo;
 
   const previa = useMemo(() => {
     if (!prazoFinal) return null;
@@ -61,18 +58,62 @@ export function ProcessoForm() {
   const toggleLembrete = (d: number) =>
     setLembretes((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort((a, b) => a - b)));
 
+  const validar = (): boolean => {
+    const e: Record<string, string> = {};
+
+    // 1. Número CNJ: exatamente 20 dígitos no padrão 0000000-00.0000.0.00.0000.
+    if (!validarNumeroCNJ(numero)) {
+      e.numero = "Número inválido — use o padrão CNJ com 20 dígitos, ex.: 0007890-12.2024.8.26.0224.";
+    } else {
+      // 3. Número repetido: permitido apenas para o MESMO cliente e
+      //    respeitando a cronologia do primeiro cadastro daquele número.
+      const mesmos = processos.filter((p) => p.numero === numero.trim() && p.id !== id);
+      const deOutroCliente = mesmos.find((p) => p.clienteId !== clienteId);
+      if (deOutroCliente) {
+        e.numero = `Este número já está cadastrado para outro cliente (${deOutroCliente.cliente?.nome ?? "—"}). Um número repetido deve pertencer ao mesmo cliente.`;
+      } else if (mesmos.length > 0 && termoInicial) {
+        const primeiro = mesmos.reduce((a, b) => (a.termoInicial <= b.termoInicial ? a : b));
+        if (termoInicial < primeiro.termoInicial) {
+          e.termoInicial = `Fora da cronologia do processo: o primeiro registro deste número tem termo inicial em ${formatarData(primeiro.termoInicial)}. O novo lançamento deve ser posterior.`;
+        }
+      }
+    }
+
+    // 2. Vara obrigatória, exceto para Petição Inicial.
+    if (!ehPeticaoInicial && vara.trim().length < 3) {
+      e.vara = "Informe a vara que será demandada (obrigatória para este tipo de procedimento).";
+    }
+
+    if (!clienteId) e.clienteId = "Vincule um cliente ao processo.";
+    if (objeto.trim().length < 5 || objeto.trim().length > 300) {
+      e.objeto = "Descreva o objeto da causa (entre 5 e 300 caracteres).";
+    }
+    if (!termoInicial) e.termoInicial = e.termoInicial ?? "Informe o termo inicial.";
+    if (!prazoFinal) {
+      e.prazo = ehPeticaoInicial
+        ? "Petição inicial não tem prazo processual — defina uma data de referência manual (prescrição/decadência)."
+        : "Defina um prazo final válido.";
+    } else if (termoInicial && prazoFinal < termoInicial) {
+      e.prazo = "O prazo final não pode ser anterior ao termo inicial.";
+    }
+
+    setErros(e);
+    return Object.keys(e).length === 0;
+  };
+
   const salvar = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prazoFinal) {
-      toast("Defina um prazo final válido.", "warning");
+    if (!validar()) {
+      toast("Corrija os campos destacados antes de salvar.", "warning");
       return;
     }
     const dados = {
-      numero,
+      numero: numero.trim(),
       clienteId,
+      area,
       tipo,
-      vara,
-      objeto,
+      vara: vara.trim(),
+      objeto: objeto.trim(),
       valor: Number(valor) || 0,
       termoInicial,
       prazo: prazoFinal,
@@ -90,13 +131,16 @@ export function ProcessoForm() {
     }
   };
 
+  const erroDe = (k: string) =>
+    erros[k] ? <p className="mt-1 text-xs font-medium text-critico">{erros[k]}</p> : null;
+
   return (
     <div className="mx-auto max-w-4xl space-y-5">
       <Link to="/app/processos" className="inline-flex items-center gap-1.5 text-sm font-medium text-body-2 hover:text-ink">
         <ArrowLeft size={16} /> Voltar para processos
       </Link>
 
-      <form onSubmit={salvar} className="grid gap-5 lg:grid-cols-3">
+      <form onSubmit={salvar} className="grid gap-5 lg:grid-cols-3" noValidate>
         {/* Coluna principal */}
         <div className="space-y-5 lg:col-span-2">
           <section className="card p-6">
@@ -107,10 +151,12 @@ export function ProcessoForm() {
                 <input
                   required
                   value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                  placeholder="0000000-00.0000.0.00.0000"
+                  onChange={(e) => setNumero(maskNumeroCNJ(e.target.value))}
+                  placeholder="0007890-12.2024.8.26.0224"
                   className="input font-mono"
+                  inputMode="numeric"
                 />
+                {erroDe("numero")}
               </div>
               <div>
                 <label className="label">Cliente vinculado</label>
@@ -121,9 +167,18 @@ export function ProcessoForm() {
                     </option>
                   ))}
                 </select>
+                {erroDe("clienteId")}
               </div>
               <div>
-                <label className="label">Tipo / Peça</label>
+                <label className="label">Área do processo</label>
+                <select value={area} onChange={(e) => setArea(e.target.value as AreaProcesso)} className="input">
+                  {AREAS.map((a) => (
+                    <option key={a}>{a}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label">Peça / Procedimento</label>
                 <select value={tipo} onChange={(e) => setTipo(e.target.value)} className="input">
                   {tiposProcesso.map((t) => (
                     <option key={t}>{t}</option>
@@ -131,14 +186,23 @@ export function ProcessoForm() {
                 </select>
               </div>
               <div>
-                <label className="label">Vara / Foro</label>
-                <input value={vara} onChange={(e) => setVara(e.target.value)} placeholder="3ª Vara Cível - SP" className="input" />
+                <label className="label">
+                  Vara / Foro {ehPeticaoInicial && <span className="normal-case text-muted">(opcional na petição inicial)</span>}
+                </label>
+                <input
+                  value={vara}
+                  onChange={(e) => setVara(e.target.value)}
+                  maxLength={80}
+                  placeholder="3ª Vara Cível - SP"
+                  className="input"
+                />
+                {erroDe("vara")}
               </div>
               <div>
                 <label className="label">Valor da causa</label>
                 <input
                   value={valor}
-                  onChange={(e) => setValor(e.target.value.replace(/[^\d]/g, ""))}
+                  onChange={(e) => setValor(e.target.value.replace(/[^\d]/g, "").slice(0, 12))}
                   inputMode="numeric"
                   placeholder="25000"
                   className="input"
@@ -150,9 +214,11 @@ export function ProcessoForm() {
                   value={objeto}
                   onChange={(e) => setObjeto(e.target.value)}
                   rows={2}
+                  maxLength={300}
                   placeholder="Ação de cobrança — débitos de obra"
                   className="input resize-none"
                 />
+                {erroDe("objeto")}
               </div>
             </div>
           </section>
@@ -160,9 +226,21 @@ export function ProcessoForm() {
           <section className="card p-6">
             <h3 className="text-lg">Contagem de prazo</h3>
             <p className="text-sm text-muted">
-              O sistema conta apenas dias úteis, excluindo fins de semana, feriados nacionais e
-              suspensões forenses regionais (MA / SP).
+              A regra legal é sugerida conforme a área e a peça escolhidas — dias úteis ou corridos.
+              Você sempre pode definir a data de referência manualmente.
             </p>
+
+            {/* Regra sugerida para o par área × peça */}
+            <div className="mt-4 flex items-start gap-3 rounded-xl bg-medio-bg p-4">
+              <Scale size={16} className="mt-0.5 shrink-0 text-medio" />
+              <div className="text-sm text-body">
+                <strong>
+                  {area} · {tipo}:
+                </strong>{" "}
+                {prazoCalculado === null ? "sem contagem automática" : descreveRegra(regra)}
+                <p className="mt-1 text-xs text-body-2">{regra.obs}</p>
+              </div>
+            </div>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
@@ -173,23 +251,7 @@ export function ProcessoForm() {
                   onChange={(e) => setTermoInicial(e.target.value)}
                   className="input"
                 />
-              </div>
-              <div>
-                <label className="label">Regra de contagem</label>
-                <select
-                  value={String(prazoLegal)}
-                  onChange={(e) => {
-                    setPrazoLegal(Number(e.target.value));
-                    setModoPrazo("auto");
-                  }}
-                  className="input"
-                >
-                  {PRAZOS_LEGAIS.map((p) => (
-                    <option key={p.label} value={p.dias}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                {erroDe("termoInicial")}
               </div>
             </div>
 
@@ -197,25 +259,27 @@ export function ProcessoForm() {
               <input
                 type="radio"
                 id="auto"
-                checked={modoPrazo === "auto"}
+                checked={modoEfetivo === "auto"}
+                disabled={prazoCalculado === null}
                 onChange={() => setModoPrazo("auto")}
                 className="accent-gold"
               />
-              <label htmlFor="auto" className="text-sm text-body">
-                Usar prazo calculado: <strong>{prazoCalculado ? formatarData(prazoCalculado) : "—"}</strong>
+              <label htmlFor="auto" className={`text-sm ${prazoCalculado === null ? "text-muted" : "text-body"}`}>
+                Usar prazo calculado ({descreveRegra(regra)}):{" "}
+                <strong>{prazoCalculado ? formatarData(prazoCalculado) : "—"}</strong>
               </label>
               <span className="mx-2 hidden h-4 w-px bg-line-2 sm:block" />
               <input
                 type="radio"
                 id="manual"
-                checked={modoPrazo === "manual"}
+                checked={modoEfetivo === "manual"}
                 onChange={() => setModoPrazo("manual")}
                 className="accent-gold"
               />
               <label htmlFor="manual" className="text-sm text-body">
-                Definir manualmente
+                Referência manual
               </label>
-              {modoPrazo === "manual" && (
+              {modoEfetivo === "manual" && (
                 <input
                   type="date"
                   value={prazo}
@@ -223,6 +287,7 @@ export function ProcessoForm() {
                   className="input mt-2 w-full sm:mt-0 sm:w-auto"
                 />
               )}
+              {erros.prazo && <p className="w-full text-xs font-medium text-critico">{erros.prazo}</p>}
             </div>
           </section>
         </div>
@@ -248,7 +313,11 @@ export function ProcessoForm() {
                   </div>
                 </>
               ) : (
-                <p className="py-6 text-sm text-muted">Informe o termo inicial para calcular o prazo.</p>
+                <p className="py-6 text-sm text-muted">
+                  {prazoCalculado === null
+                    ? "Este procedimento não tem contagem automática — defina a data de referência manual."
+                    : "Informe o termo inicial para calcular o prazo."}
+                </p>
               )}
             </div>
           </section>

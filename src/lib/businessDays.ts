@@ -25,7 +25,7 @@ const FERIADOS_REGIONAIS_FIXOS = [
 ];
 
 /** Suspensões de expediente forense cadastradas manualmente (AAAA-MM-DD). */
-const SUSPENSOES = new Set<string>(["2026-06-12"]);
+const SUSPENSOES = new Set<string>(["2026-10-01"]);
 
 /** Calcula a Páscoa (algoritmo de Meeus/Butcher) para feriados móveis. */
 function pascoa(ano: number): Date {
@@ -86,21 +86,6 @@ export function ehDiaUtil(d: Date): boolean {
   return true;
 }
 
-/** Motivo pelo qual um dia não é útil (para o calendário). */
-export function tipoDeDia(d: Date): "util" | "fim-de-semana" | "feriado" | "suspensao" {
-  const dow = d.getDay();
-  if (dow === 0 || dow === 6) return "fim-de-semana";
-  if (SUSPENSOES.has(isoKey(d))) return "suspensao";
-  const mmdd = key(d);
-  if (
-    FERIADOS_NACIONAIS_FIXOS.includes(mmdd) ||
-    FERIADOS_REGIONAIS_FIXOS.includes(mmdd) ||
-    feriadosMoveis(d.getFullYear()).has(mmdd)
-  )
-    return "feriado";
-  return "util";
-}
-
 function parseISO(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y, m - 1, d);
@@ -145,5 +130,15 @@ export function somarDiasUteis(inicioISO: string, dias: number): string {
     cursor = addDays(cursor, 1);
     if (ehDiaUtil(cursor)) restantes--;
   }
+  return isoKey(cursor);
+}
+
+/**
+ * Soma N dias CORRIDOS a uma data inicial (prazos penais). Se o vencimento
+ * cair em dia não útil, prorroga para o primeiro dia útil seguinte.
+ */
+export function somarDiasCorridos(inicioISO: string, dias: number): string {
+  let cursor = addDays(parseISO(inicioISO), dias);
+  while (!ehDiaUtil(cursor)) cursor = addDays(cursor, 1);
   return isoKey(cursor);
 }

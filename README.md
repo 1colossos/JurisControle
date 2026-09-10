@@ -15,15 +15,15 @@ Projeto desenvolvido para a disciplina de **Desenvolvimento Web** do curso de An
 
 ## 🖥️ Telas (9)
 
-1. **Login e Autenticação** — acesso seguro + modo demonstração.
-2. **Dashboard** — KPIs, termos críticos, legenda de urgência e painel de notificações.
-3. **Listagem de Processos** — busca, filtros por urgência/status e paginação.
-4. **Cadastro / Edição** — contagem de prazos em dias úteis com prévia e lembretes.
-5. **Detalhes do Processo** — cabeçalho, linha do tempo, arquivos e exclusão.
-6. **Clientes** — tabela, filtro por tipo e formulário flutuante (criar/editar).
-7. **Calendário Interativo** — grade dinâmica com feriados/suspensões e detalhes do dia.
-8. **Relatórios e Exportação** — filtros de período, gráficos e pré-visualização.
-9. **Configurações e Integrações** — perfil, SMTP, Z-API (WhatsApp) e toggles de alertas.
+1. **Login** — acesso com CPF ou e-mail e senha, com logo do sistema.
+2. **Criar conta** — cadastro do advogado (e-mail, nome, nascimento, OAB, áreas de atuação, telefone, UF e escritório opcional) com validação completa.
+3. **Esqueci minha senha** — recuperação por CPF ou e-mail.
+4. **Dashboard** — KPIs, termos críticos, notificações do usuário e exportação do painel em PDF.
+5. **Listagem de Processos** — busca, filtros por urgência/status e paginação.
+6. **Cadastro / Edição de Processo** — área do processo (Cível, Trabalhista, Penal, Tributária…), regras legais de contagem por peça/área (dias úteis ou corridos) com referência manual sempre disponível, validação do número CNJ e da vara.
+7. **Detalhes do Processo** — linha do tempo e anexos com upload, pré-visualização (PDF/imagem) e exclusão.
+8. **Clientes** — PF/PJ com CPF/CNPJ validados (dígito verificador), status social, domicílio e contatos.
+9. **Configurações** — perfil com foto, tema claro/escuro, SMTP, Z-API (WhatsApp) e toggles de alertas.
 
 ## 🛠️ Stack
 
@@ -31,7 +31,7 @@ Projeto desenvolvido para a disciplina de **Desenvolvimento Web** do curso de An
 - [Vite](https://vitejs.dev/) (build e dev server)
 - [Tailwind CSS](https://tailwindcss.com/) (design system navy + dourado)
 - [React Router](https://reactrouter.com/) (navegação)
-- [Recharts](https://recharts.org/) (gráficos) · [Framer Motion](https://www.framer.com/motion/) (animações) · [Lucide](https://lucide.dev/) (ícones)
+- [Framer Motion](https://www.framer.com/motion/) (animações) · [Lucide](https://lucide.dev/) (ícones)
 
 ## 🚀 Como executar
 

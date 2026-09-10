@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -10,24 +11,25 @@ export default {
           700: "#1b2c52",
           600: "#243a66",
         },
-        ink: "#16213e",
+        // Cores temáticas (claro/escuro) via variáveis CSS — ver index.css.
+        ink: "rgb(var(--c-ink) / <alpha-value>)",
         gold: {
           DEFAULT: "#e0a83a",
           600: "#d3982a",
           soft: "#f4d79b",
-          bg: "#fbf3df",
+          bg: "rgb(var(--c-gold-bg) / <alpha-value>)",
         },
-        canvas: "#f4f6fa",
-        surface: "#ffffff",
-        line: "#e6e9f1",
-        "line-2": "#dde2ec",
-        body: "#1f2937",
-        "body-2": "#475467",
-        muted: "#8a93a6",
-        critico: { DEFAULT: "#e0413a", bg: "#fdecec" },
-        alto: { DEFAULT: "#d3982a", bg: "#fbf2dd" },
-        medio: { DEFAULT: "#3b5bdb", bg: "#e9edfb" },
-        baixo: { DEFAULT: "#1f9d57", bg: "#e6f6ec" },
+        canvas: "rgb(var(--c-canvas) / <alpha-value>)",
+        surface: "rgb(var(--c-surface) / <alpha-value>)",
+        line: "rgb(var(--c-line) / <alpha-value>)",
+        "line-2": "rgb(var(--c-line2) / <alpha-value>)",
+        body: "rgb(var(--c-body) / <alpha-value>)",
+        "body-2": "rgb(var(--c-body2) / <alpha-value>)",
+        muted: "rgb(var(--c-muted) / <alpha-value>)",
+        critico: { DEFAULT: "#e0413a", bg: "rgb(var(--c-critico-bg) / <alpha-value>)" },
+        alto: { DEFAULT: "#d3982a", bg: "rgb(var(--c-alto-bg) / <alpha-value>)" },
+        medio: { DEFAULT: "#3b5bdb", bg: "rgb(var(--c-medio-bg) / <alpha-value>)" },
+        baixo: { DEFAULT: "#1f9d57", bg: "rgb(var(--c-baixo-bg) / <alpha-value>)" },
       },
       fontFamily: {
         serif: ['"Playfair Display"', "Georgia", "serif"],

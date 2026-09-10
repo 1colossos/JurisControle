@@ -12,8 +12,6 @@ const META: { pattern: string; titulo: string; subtitulo: string }[] = [
   { pattern: "/app/processos/:id/editar", titulo: "Editar Processo", subtitulo: "Atualização de dados e prazos" },
   { pattern: "/app/processos/:id", titulo: "Detalhes do Processo", subtitulo: "Trajetória e cronograma da causa" },
   { pattern: "/app/clientes", titulo: "Clientes", subtitulo: "Base de contatos e contratantes do escritório" },
-  { pattern: "/app/calendario", titulo: "Calendário", subtitulo: "Expedientes, feriados e prazos processuais" },
-  { pattern: "/app/relatorios", titulo: "Relatórios e Exportação", subtitulo: "Análise de produtividade e histórico do escritório" },
   { pattern: "/app/configuracoes", titulo: "Configurações e Integrações", subtitulo: "Perfil do usuário e ajustes para notificações automatizadas" },
 ];
 

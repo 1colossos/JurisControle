@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -8,13 +9,12 @@ import {
 import {
   clientes as seedClientes,
   processos as seedProcessos,
-  eventosBase,
   usuario as seedUsuario,
   HOJE_REF,
+  type Arquivo,
   type Cliente,
   type Processo,
   type Usuario,
-  type EventoCalendario,
 } from "@/data/seed";
 import {
   classificarUrgencia,
@@ -29,13 +29,16 @@ export interface ProcessoView extends Processo {
   urgencia: Urgencia;
 }
 
+export type Tema = "light" | "dark";
+
 interface AppState {
   usuario: Usuario;
   setUsuario: (u: Usuario) => void;
   clientes: Cliente[];
   processos: ProcessoView[];
-  eventos: EventoCalendario[];
   autenticado: boolean;
+  tema: Tema;
+  setTema: (t: Tema) => void;
   login: () => void;
   logout: () => void;
   addCliente: (c: Omit<Cliente, "id">) => void;
@@ -43,6 +46,8 @@ interface AppState {
   addProcesso: (p: Omit<Processo, "id" | "timeline" | "arquivos">) => string;
   updateProcesso: (id: string, p: Partial<Processo>) => void;
   removeProcesso: (id: string) => void;
+  addArquivo: (processoId: string, arquivo: Arquivo) => void;
+  removeArquivo: (processoId: string, arquivoId: string) => void;
   getCliente: (id: string) => Cliente | undefined;
   getProcesso: (id: string) => ProcessoView | undefined;
   processosPorCliente: (clienteId: string) => number;
@@ -60,11 +65,22 @@ function enrich(p: Processo, clientes: Cliente[]): ProcessoView {
   };
 }
 
+function temaInicial(): Tema {
+  const salvo = localStorage.getItem("jc-tema");
+  return salvo === "dark" ? "dark" : "light";
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario>(seedUsuario);
   const [clientes, setClientes] = useState<Cliente[]>(seedClientes);
   const [processosRaw, setProcessosRaw] = useState<Processo[]>(seedProcessos);
   const [autenticado, setAutenticado] = useState(false);
+  const [tema, setTema] = useState<Tema>(temaInicial);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", tema === "dark");
+    localStorage.setItem("jc-tema", tema);
+  }, [tema]);
 
   const processos = useMemo<ProcessoView[]>(
     () =>
@@ -83,8 +99,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUsuario,
       clientes,
       processos,
-      eventos: eventosBase,
       autenticado,
+      tema,
+      setTema,
       login: () => setAutenticado(true),
       logout: () => setAutenticado(false),
       addCliente: (c) => setClientes((prev) => [{ ...c, id: novoId("c") }, ...prev]),
@@ -113,12 +130,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateProcesso: (id, patch) =>
         setProcessosRaw((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p))),
       removeProcesso: (id) => setProcessosRaw((prev) => prev.filter((p) => p.id !== id)),
+      addArquivo: (processoId, arquivo) =>
+        setProcessosRaw((prev) =>
+          prev.map((p) =>
+            p.id === processoId ? { ...p, arquivos: [...p.arquivos, arquivo] } : p,
+          ),
+        ),
+      removeArquivo: (processoId, arquivoId) =>
+        setProcessosRaw((prev) =>
+          prev.map((p) =>
+            p.id === processoId
+              ? { ...p, arquivos: p.arquivos.filter((a) => a.id !== arquivoId) }
+              : p,
+          ),
+        ),
       getCliente: (id) => clientes.find((c) => c.id === id),
       getProcesso: (id) => processos.find((p) => p.id === id),
       processosPorCliente: (clienteId) =>
         processosRaw.filter((p) => p.clienteId === clienteId).length,
     };
-  }, [usuario, clientes, processos, processosRaw, autenticado]);
+  }, [usuario, clientes, processos, processosRaw, autenticado, tema]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

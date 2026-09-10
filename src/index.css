@@ -3,9 +3,42 @@
 @tailwind utilities;
 
 @layer base {
+  /* Tema claro (oficial) — valores RGB para permitir modificadores de opacidade. */
   :root {
     color-scheme: light;
+    --c-canvas: 244 246 250; /* #f4f6fa */
+    --c-surface: 255 255 255; /* #ffffff */
+    --c-line: 230 233 241; /* #e6e9f1 */
+    --c-line2: 221 226 236; /* #dde2ec */
+    --c-body: 31 41 55; /* #1f2937 */
+    --c-body2: 71 84 103; /* #475467 */
+    --c-muted: 138 147 166; /* #8a93a6 */
+    --c-ink: 22 33 62; /* #16213e */
+    --c-gold-bg: 251 243 223; /* #fbf3df */
+    --c-critico-bg: 253 236 236; /* #fdecec */
+    --c-alto-bg: 251 242 221; /* #fbf2dd */
+    --c-medio-bg: 233 237 251; /* #e9edfb */
+    --c-baixo-bg: 230 246 236; /* #e6f6ec */
   }
+
+  /* Tema escuro (bônus do sistema, adesão do usuário). */
+  .dark {
+    color-scheme: dark;
+    --c-canvas: 10 16 30; /* #0a101e */
+    --c-surface: 19 27 46; /* #131b2e */
+    --c-line: 37 47 72; /* #252f48 */
+    --c-line2: 47 59 88; /* #2f3b58 */
+    --c-body: 226 232 244; /* #e2e8f4 */
+    --c-body2: 168 179 199; /* #a8b3c7 */
+    --c-muted: 122 134 158; /* #7a869e */
+    --c-ink: 238 242 250; /* #eef2fa */
+    --c-gold-bg: 58 47 22; /* #3a2f16 */
+    --c-critico-bg: 61 26 26; /* #3d1a1a */
+    --c-alto-bg: 60 47 20; /* #3c2f14 */
+    --c-medio-bg: 27 35 66; /* #1b2342 */
+    --c-baixo-bg: 21 51 34; /* #153322 */
+  }
+
   html,
   body,
   #root {
@@ -37,6 +70,14 @@
     background: #b6bfd2;
     background-clip: content-box;
   }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #33415e;
+    background-clip: content-box;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #41527a;
+    background-clip: content-box;
+  }
 }
 
 @layer components {
@@ -44,7 +85,7 @@
     @apply rounded-xl border border-line bg-surface shadow-soft;
   }
   .input {
-    @apply w-full rounded-xl border border-line-2 bg-white px-3.5 py-2.5 text-body
+    @apply w-full rounded-xl border border-line-2 bg-surface px-3.5 py-2.5 text-body
       outline-none transition placeholder:text-muted
       focus:border-gold focus:ring-2 focus:ring-gold/30;
   }
@@ -56,15 +97,18 @@
       text-sm font-semibold transition active:translate-y-px disabled:opacity-50;
   }
   .btn-primary {
-    @apply btn bg-ink text-white hover:bg-navy-700 shadow-soft;
+    @apply btn bg-navy-800 text-white hover:bg-navy-700 shadow-soft;
+  }
+  .dark .btn-primary {
+    @apply bg-gold text-navy-900 hover:bg-gold-600;
   }
   .btn-gold {
-    @apply btn bg-gold text-ink hover:bg-gold-600;
+    @apply btn bg-gold text-navy-900 hover:bg-gold-600;
   }
   .btn-ghost {
-    @apply btn border border-line-2 bg-white text-body hover:bg-canvas;
+    @apply btn border border-line-2 bg-surface text-body hover:bg-canvas;
   }
   .btn-danger {
-    @apply btn bg-critico-bg text-critico hover:bg-[#fadddc];
+    @apply btn bg-critico-bg text-critico hover:opacity-80;
   }
 }

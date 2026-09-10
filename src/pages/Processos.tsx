@@ -115,8 +115,11 @@ export function Processos() {
                     </Link>
                   </td>
                   <td className="px-5 py-4 font-medium text-body">{p.cliente?.nome}</td>
-                  <td className="px-5 py-4 text-body-2">{p.tipo}</td>
-                  <td className="px-5 py-4 text-body-2">{p.vara}</td>
+                  <td className="px-5 py-4 text-body-2">
+                    <div>{p.tipo}</div>
+                    <div className="text-xs text-muted">{p.area}</div>
+                  </td>
+                  <td className="px-5 py-4 text-body-2">{p.vara || "—"}</td>
                   <td className="px-5 py-4">
                     <div className="font-semibold text-body">{formatarData(p.prazo)}</div>
                     <div className="text-xs text-muted">{diasUteisLabel(p.diasUteis)}</div>
