@@ -119,6 +119,13 @@ export function Login() {
           </Link>
         </p>
 
+        <p className="mt-2 text-center text-sm text-muted">
+          É cliente do escritório?{" "}
+          <Link to="/portal" className="font-semibold text-gold-600 hover:underline">
+            Acesse o Portal do Cliente.
+          </Link>
+        </p>
+
         <p className="mt-8 text-center text-xs text-muted">
           © 2026 JurisControle. Todos os direitos reservados.
         </p>
