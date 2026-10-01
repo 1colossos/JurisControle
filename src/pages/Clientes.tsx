@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Search, Plus, Mail, Phone, MapPin } from "lucide-react";
+import { Search, Plus, Mail, Phone, MapPin, FileSignature, ScrollText, KeyRound } from "lucide-react";
 import { useApp } from "@/store/AppContext";
 import { useToast } from "@/components/ui/Toast";
+import { gerarDocumentoPdf, DOCUMENTO_LABEL, type TipoDocumento } from "@/lib/documentos";
 import { Modal } from "@/components/ui/Modal";
 import { Pill } from "@/components/ui/Badge";
 import { iniciais } from "@/lib/format";
@@ -41,8 +42,18 @@ const vazio: FormCliente = {
 };
 
 export function Clientes() {
-  const { clientes, addCliente, updateCliente, processosPorCliente } = useApp();
+  const { clientes, addCliente, updateCliente, processosPorCliente, usuario } = useApp();
   const toast = useToast();
+
+  const gerarDocumento = (tipo: TipoDocumento, cliente: Cliente) => {
+    const ok = gerarDocumentoPdf(tipo, cliente, usuario);
+    toast(
+      ok
+        ? `${DOCUMENTO_LABEL[tipo]} gerado(a) com os dados de ${cliente.nome} — escolha "Salvar como PDF".`
+        : "Não foi possível abrir o documento (pop-up bloqueado).",
+      ok ? "success" : "warning",
+    );
+  };
   const [q, setQ] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState<"todos" | TipoCliente>("todos");
   const [aberto, setAberto] = useState(false);
@@ -169,6 +180,7 @@ export function Clientes() {
                 <th className="px-5 py-3 font-semibold">Domicílio</th>
                 <th className="px-5 py-3 font-semibold">Tipo</th>
                 <th className="px-5 py-3 text-right font-semibold">Processos</th>
+                <th className="px-5 py-3 text-right font-semibold">Documentos</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -191,7 +203,12 @@ export function Clientes() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-4 font-mono text-xs text-body-2">{c.doc}</td>
+                  <td className="px-5 py-4 font-mono text-xs text-body-2">
+                    {c.doc}
+                    <span className="mt-1 flex items-center gap-1 text-[11px] text-muted" title="Token de acesso ao Portal do Cliente">
+                      <KeyRound size={11} /> {c.portalToken}
+                    </span>
+                  </td>
                   <td className="px-5 py-4 text-body-2">
                     <div className="flex items-center gap-1.5 text-xs">
                       <Mail size={12} className="text-muted" /> {c.email}
@@ -211,11 +228,35 @@ export function Clientes() {
                   <td className="px-5 py-4 text-right font-serif text-lg font-bold text-ink">
                     {processosPorCliente(c.id)}
                   </td>
+                  <td className="px-5 py-4">
+                    <div className="flex justify-end gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          gerarDocumento("procuracao", c);
+                        }}
+                        title="Gerar procuração ad judicia"
+                        className="rounded-lg p-2 text-muted transition hover:bg-gold-bg hover:text-gold-600"
+                      >
+                        <FileSignature size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          gerarDocumento("contrato_honorarios", c);
+                        }}
+                        title="Gerar contrato de honorários"
+                        className="rounded-lg p-2 text-muted transition hover:bg-gold-bg hover:text-gold-600"
+                      >
+                        <ScrollText size={16} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-muted">
+                  <td colSpan={7} className="px-5 py-12 text-center text-muted">
                     Nenhum cliente encontrado.
                   </td>
                 </tr>
