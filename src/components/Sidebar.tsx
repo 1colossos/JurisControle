@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   FileText,
   Users,
+  Wallet,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -14,6 +15,7 @@ const NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/app/processos", label: "Processos", icon: FileText },
   { to: "/app/clientes", label: "Clientes", icon: Users },
+  { to: "/app/financeiro", label: "Financeiro", icon: Wallet },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 

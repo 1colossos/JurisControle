@@ -9,11 +9,14 @@ import {
 import {
   clientes as seedClientes,
   processos as seedProcessos,
+  transacoes as seedTransacoes,
   usuario as seedUsuario,
   HOJE_REF,
   type Arquivo,
   type Cliente,
   type Processo,
+  type StatusTransacao,
+  type TransacaoFinanceira,
   type Usuario,
 } from "@/data/seed";
 import {
@@ -21,12 +24,20 @@ import {
   diasUteisAte,
   type Urgencia,
 } from "@/lib/businessDays";
+import { statusEfetivo } from "@/lib/financeiro";
 
 /** Processo enriquecido com cálculos derivados (não persistidos). */
 export interface ProcessoView extends Processo {
   cliente: Cliente | undefined;
   diasUteis: number;
   urgencia: Urgencia;
+}
+
+/** Transação enriquecida com vínculos e status derivado do vencimento. */
+export interface TransacaoView extends TransacaoFinanceira {
+  cliente: Cliente | undefined;
+  processo: Processo | undefined;
+  statusEfetivo: StatusTransacao;
 }
 
 export type Tema = "light" | "dark";
@@ -41,8 +52,13 @@ interface AppState {
   setTema: (t: Tema) => void;
   login: () => void;
   logout: () => void;
-  addCliente: (c: Omit<Cliente, "id">) => void;
+  transacoes: TransacaoView[];
+  addCliente: (c: Omit<Cliente, "id" | "portalToken">) => void;
   updateCliente: (id: string, c: Partial<Cliente>) => void;
+  addTransacao: (t: Omit<TransacaoFinanceira, "id">) => void;
+  updateTransacao: (id: string, t: Partial<TransacaoFinanceira>) => void;
+  removeTransacao: (id: string) => void;
+  marcarTransacaoPaga: (id: string) => void;
   addProcesso: (p: Omit<Processo, "id" | "timeline" | "arquivos">) => string;
   updateProcesso: (id: string, p: Partial<Processo>) => void;
   removeProcesso: (id: string) => void;
@@ -74,6 +90,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario>(seedUsuario);
   const [clientes, setClientes] = useState<Cliente[]>(seedClientes);
   const [processosRaw, setProcessosRaw] = useState<Processo[]>(seedProcessos);
+  const [transacoesRaw, setTransacoesRaw] = useState<TransacaoFinanceira[]>(seedTransacoes);
   const [autenticado, setAutenticado] = useState(false);
   const [tema, setTema] = useState<Tema>(temaInicial);
 
@@ -90,21 +107,53 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [processosRaw, clientes],
   );
 
+  const transacoes = useMemo<TransacaoView[]>(
+    () =>
+      transacoesRaw
+        .map((t) => ({
+          ...t,
+          cliente: clientes.find((c) => c.id === t.clienteId),
+          processo: processosRaw.find((p) => p.id === t.processoId),
+          statusEfetivo: statusEfetivo(t, HOJE_REF),
+        }))
+        .sort((a, b) => b.dataVencimento.localeCompare(a.dataVencimento)),
+    [transacoesRaw, clientes, processosRaw],
+  );
+
   const value = useMemo<AppState>(() => {
     const novoId = (prefix: string) =>
       `${prefix}${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+
+    /** Token do portal: primeiro nome + sufixo aleatório, ex.: MARINA-8F3K. */
+    const novoToken = (nome: string) => {
+      const base = nome
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .replace(/[^A-Za-z ]/g, "")
+        .trim()
+        .split(/\s+/)[0]
+        .toUpperCase()
+        .slice(0, 8);
+      const sufixo = Math.random().toString(36).slice(2, 6).toUpperCase();
+      return `${base || "CLIENTE"}-${sufixo}`;
+    };
 
     return {
       usuario,
       setUsuario,
       clientes,
       processos,
+      transacoes,
       autenticado,
       tema,
       setTema,
       login: () => setAutenticado(true),
       logout: () => setAutenticado(false),
-      addCliente: (c) => setClientes((prev) => [{ ...c, id: novoId("c") }, ...prev]),
+      addCliente: (c) =>
+        setClientes((prev) => [
+          { ...c, id: novoId("c"), portalToken: novoToken(c.nome) },
+          ...prev,
+        ]),
       updateCliente: (id, patch) =>
         setClientes((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c))),
       addProcesso: (p) => {
@@ -144,12 +193,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
               : p,
           ),
         ),
+      addTransacao: (t) =>
+        setTransacoesRaw((prev) => [{ ...t, id: novoId("t") }, ...prev]),
+      updateTransacao: (id, patch) =>
+        setTransacoesRaw((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t))),
+      removeTransacao: (id) =>
+        setTransacoesRaw((prev) => prev.filter((t) => t.id !== id)),
+      marcarTransacaoPaga: (id) =>
+        setTransacoesRaw((prev) =>
+          prev.map((t) =>
+            t.id === id ? { ...t, status: "pago", dataPagamento: HOJE_REF } : t,
+          ),
+        ),
       getCliente: (id) => clientes.find((c) => c.id === id),
       getProcesso: (id) => processos.find((p) => p.id === id),
       processosPorCliente: (clienteId) =>
         processosRaw.filter((p) => p.clienteId === clienteId).length,
     };
-  }, [usuario, clientes, processos, processosRaw, autenticado, tema]);
+  }, [usuario, clientes, processos, processosRaw, transacoes, autenticado, tema]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

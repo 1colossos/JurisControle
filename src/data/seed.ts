@@ -45,6 +45,7 @@ export interface Cliente {
   tipo: TipoCliente;
   estadoCivil?: EstadoCivil; // apenas pessoa física
   endereco: string; // domicílio do cliente
+  portalToken: string; // token de acesso ao Portal do Cliente, gerado pelo escritório
 }
 
 export type StatusProcesso = "Em andamento" | "Suspenso" | "Arquivado";
@@ -93,11 +94,11 @@ export const usuario: Usuario = {
 };
 
 export const clientes: Cliente[] = [
-  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-90", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Paulo - SP" },
-  { id: "c2", nome: "Marina Vasconcelos", doc: "123.456.789-09", email: "marina.v@email.com", tel: "(11) 98877-6655", tipo: "PF", estadoCivil: "Casado(a)", endereco: "Guarulhos - SP" },
-  { id: "c3", nome: "Pedro Henrique Sales", doc: "987.654.321-00", email: "pedrohs@gmail.com", tel: "(11) 99988-1122", tipo: "PF", estadoCivil: "Solteiro(a)", endereco: "São Paulo - SP" },
-  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-10", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Barueri - SP" },
-  { id: "c5", nome: "Família Antunes", doc: "456.789.123-00", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Osasco - SP" },
+  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-90", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Paulo - SP", portalToken: "AURORA-26" },
+  { id: "c2", nome: "Marina Vasconcelos", doc: "123.456.789-09", email: "marina.v@email.com", tel: "(11) 98877-6655", tipo: "PF", estadoCivil: "Casado(a)", endereco: "Guarulhos - SP", portalToken: "MARINA-26" },
+  { id: "c3", nome: "Pedro Henrique Sales", doc: "987.654.321-00", email: "pedrohs@gmail.com", tel: "(11) 99988-1122", tipo: "PF", estadoCivil: "Solteiro(a)", endereco: "São Paulo - SP", portalToken: "PEDRO-26" },
+  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-10", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Barueri - SP", portalToken: "TECH-26" },
+  { id: "c5", nome: "Família Antunes", doc: "456.789.123-00", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Osasco - SP", portalToken: "ANTUNES-26" },
 ];
 
 const timelinePadrao: EventoTimeline[] = [
@@ -126,6 +127,81 @@ export const notificacoes = [
   { canal: "E-mail (SMTP)", valor: "32 enviados" },
   { canal: "WhatsApp (Z-API)", valor: "18 enviados" },
   { canal: "Notificações no app", valor: "47 entregues" },
+];
+
+/* ------------------------- Módulo financeiro ------------------------- */
+
+export type TipoTransacao = "receita" | "despesa_operacional" | "custas_processuais";
+
+export type CategoriaTransacao =
+  | "honorarios_contratuais"
+  | "honorarios_exito"
+  | "sucumbencia"
+  | "luz"
+  | "internet"
+  | "diligencia";
+
+/** Status persistido; "atrasado" também é derivado quando pendente vence. */
+export type StatusTransacao = "pendente" | "pago" | "atrasado";
+
+export interface TransacaoFinanceira {
+  id: string;
+  descricao: string;
+  tipo: TipoTransacao;
+  categoria: CategoriaTransacao;
+  valor: number;
+  dataVencimento: string; // AAAA-MM-DD
+  dataPagamento?: string; // AAAA-MM-DD (apenas quando paga)
+  status: StatusTransacao;
+  clienteId?: string; // FK opcional → Cliente
+  processoId?: string; // FK opcional → Processo
+}
+
+export const transacoes: TransacaoFinanceira[] = [
+  // ---- Receitas: honorários contratuais (parcelas mensais) ----
+  { id: "t01", descricao: "Honorários contratuais — parcela 01/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-01-15", dataPagamento: "2026-01-14", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t02", descricao: "Honorários contratuais — parcela 02/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-02-15", dataPagamento: "2026-02-15", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t03", descricao: "Honorários contratuais — parcela 03/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-03-15", dataPagamento: "2026-03-17", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t04", descricao: "Honorários contratuais — parcela 04/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-04-15", dataPagamento: "2026-04-15", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t05", descricao: "Honorários contratuais — parcela 05/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-05-15", dataPagamento: "2026-05-18", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t06", descricao: "Honorários contratuais — parcela 06/12", tipo: "receita", categoria: "honorarios_contratuais", valor: 2500, dataVencimento: "2026-06-15", status: "pendente", clienteId: "c1", processoId: "p1" },
+  { id: "t07", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-01-10", dataPagamento: "2026-01-10", status: "pago", clienteId: "c4" },
+  { id: "t08", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-02-10", dataPagamento: "2026-02-11", status: "pago", clienteId: "c4" },
+  { id: "t09", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-03-10", dataPagamento: "2026-03-10", status: "pago", clienteId: "c4" },
+  { id: "t10", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-04-10", dataPagamento: "2026-04-12", status: "pago", clienteId: "c4" },
+  { id: "t11", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-05-10", dataPagamento: "2026-05-10", status: "pago", clienteId: "c4" },
+  { id: "t12", descricao: "Honorários contratuais — assessoria mensal", tipo: "receita", categoria: "honorarios_contratuais", valor: 4800, dataVencimento: "2026-06-20", status: "pendente", clienteId: "c4" },
+  { id: "t13", descricao: "Honorários contratuais — parcela única", tipo: "receita", categoria: "honorarios_contratuais", valor: 1950, dataVencimento: "2026-06-11", status: "pendente", clienteId: "c2", processoId: "p2" },
+  { id: "t14", descricao: "Honorários contratuais — entrada do contrato", tipo: "receita", categoria: "honorarios_contratuais", valor: 1200, dataVencimento: "2026-06-25", status: "pendente", clienteId: "c3", processoId: "p3" },
+
+  // ---- Receitas: êxito e sucumbência ----
+  { id: "t15", descricao: "Honorários de êxito — acordo homologado", tipo: "receita", categoria: "honorarios_exito", valor: 8200, dataVencimento: "2026-03-30", dataPagamento: "2026-03-30", status: "pago", clienteId: "c3", processoId: "p3" },
+  { id: "t16", descricao: "Honorários de êxito — sentença favorável", tipo: "receita", categoria: "honorarios_exito", valor: 12400, dataVencimento: "2026-05-22", dataPagamento: "2026-05-26", status: "pago", clienteId: "c4", processoId: "p4" },
+  { id: "t17", descricao: "Honorários de êxito — alimentos (1ª parcela)", tipo: "receita", categoria: "honorarios_exito", valor: 3200, dataVencimento: "2026-06-08", status: "pendente", clienteId: "c5", processoId: "p5" },
+  { id: "t18", descricao: "Sucumbência — execução de honorários", tipo: "receita", categoria: "sucumbencia", valor: 1850, dataVencimento: "2026-02-20", dataPagamento: "2026-02-20", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t19", descricao: "Sucumbência — cumprimento de sentença", tipo: "receita", categoria: "sucumbencia", valor: 2300, dataVencimento: "2026-04-28", dataPagamento: "2026-04-30", status: "pago", clienteId: "c2", processoId: "p2" },
+  { id: "t20", descricao: "Sucumbência — verba fixada em apelação", tipo: "receita", categoria: "sucumbencia", valor: 1500, dataVencimento: "2026-05-30", status: "pendente", clienteId: "c3", processoId: "p3" },
+
+  // ---- Despesas operacionais do escritório ----
+  { id: "t21", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 448.32, dataVencimento: "2026-01-05", dataPagamento: "2026-01-05", status: "pago" },
+  { id: "t22", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 462.1, dataVencimento: "2026-02-05", dataPagamento: "2026-02-05", status: "pago" },
+  { id: "t23", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 480.55, dataVencimento: "2026-03-05", dataPagamento: "2026-03-06", status: "pago" },
+  { id: "t24", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 455.9, dataVencimento: "2026-04-06", dataPagamento: "2026-04-06", status: "pago" },
+  { id: "t25", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 472.18, dataVencimento: "2026-05-05", dataPagamento: "2026-05-05", status: "pago" },
+  { id: "t26", descricao: "Conta de luz — Enel", tipo: "despesa_operacional", categoria: "luz", valor: 490.75, dataVencimento: "2026-06-05", dataPagamento: "2026-06-05", status: "pago" },
+  { id: "t27", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-01-10", dataPagamento: "2026-01-10", status: "pago" },
+  { id: "t28", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-02-10", dataPagamento: "2026-02-10", status: "pago" },
+  { id: "t29", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-03-10", dataPagamento: "2026-03-10", status: "pago" },
+  { id: "t30", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-04-10", dataPagamento: "2026-04-10", status: "pago" },
+  { id: "t31", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-05-10", dataPagamento: "2026-05-11", status: "pago" },
+  { id: "t32", descricao: "Internet fibra 500 MB — Vivo", tipo: "despesa_operacional", categoria: "internet", valor: 189.9, dataVencimento: "2026-06-10", dataPagamento: "2026-06-10", status: "pago" },
+
+  // ---- Custas processuais e diligências ----
+  { id: "t33", descricao: "Diligência — oficial de justiça (citação)", tipo: "custas_processuais", categoria: "diligencia", valor: 350, dataVencimento: "2026-02-18", dataPagamento: "2026-02-18", status: "pago", clienteId: "c1", processoId: "p1" },
+  { id: "t34", descricao: "Diligência — cópias e autenticações", tipo: "custas_processuais", categoria: "diligencia", valor: 220, dataVencimento: "2026-03-25", dataPagamento: "2026-03-25", status: "pago", clienteId: "c3", processoId: "p3" },
+  { id: "t35", descricao: "Diligência — perícia contábil (adiantamento)", tipo: "custas_processuais", categoria: "diligencia", valor: 540, dataVencimento: "2026-04-15", dataPagamento: "2026-04-16", status: "pago", clienteId: "c4", processoId: "p4" },
+  { id: "t36", descricao: "Diligência — deslocamento audiência", tipo: "custas_processuais", categoria: "diligencia", valor: 380, dataVencimento: "2026-05-20", dataPagamento: "2026-05-20", status: "pago", clienteId: "c2", processoId: "p2" },
+  { id: "t37", descricao: "Diligência — guia de custas recursais", tipo: "custas_processuais", categoria: "diligencia", valor: 310, dataVencimento: "2026-06-18", status: "pendente", clienteId: "c1", processoId: "p1" },
 ];
 
 export const tiposProcesso = [
