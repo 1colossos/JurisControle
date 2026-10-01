@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Plus, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Plus, SlidersHorizontal, ChevronLeft, ChevronRight, Calculator } from "lucide-react";
 import { useApp } from "@/store/AppContext";
+import { CalculadoraPrazosModal } from "@/components/CalculadoraPrazosModal";
 import { UrgencyBadge, StatusBadge } from "@/components/ui/Badge";
 import { ORDEM_URGENCIA, URGENCIA } from "@/components/ui/urgency";
 import { formatarData, diasUteisLabel } from "@/lib/format";
@@ -16,6 +17,7 @@ export function Processos() {
   const [urg, setUrg] = useState<Urgencia | "todas">("todas");
   const [status, setStatus] = useState("todos");
   const [pagina, setPagina] = useState(1);
+  const [calcAberta, setCalcAberta] = useState(false);
 
   const filtrados = useMemo(() => {
     const termo = q.trim().toLowerCase();
@@ -38,11 +40,16 @@ export function Processos() {
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-3">
+        <button onClick={() => setCalcAberta(true)} className="btn-ghost">
+          <Calculator size={16} /> Calculadora de prazos
+        </button>
         <Link to="/app/processos/novo" className="btn-primary">
           <Plus size={16} /> Novo processo
         </Link>
       </div>
+
+      <CalculadoraPrazosModal open={calcAberta} onClose={() => setCalcAberta(false)} />
 
       {/* Filtros */}
       <div className="card flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
