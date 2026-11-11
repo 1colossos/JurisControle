@@ -1,12 +1,22 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft, Save, CalendarClock, Info, Scale } from "lucide-react";
+import { ArrowLeft, Save, CalendarClock, Clock, Info } from "lucide-react";
 import { useApp } from "@/store/AppContext";
 import { useToast } from "@/components/ui/Toast";
 import { UrgencyBadge } from "@/components/ui/Badge";
 import { URGENCIA } from "@/components/ui/urgency";
-import { tiposProcesso, HOJE_REF } from "@/data/seed";
-import { AREAS, regraPrazo, descreveRegra, calcularPrazoSugerido, type AreaProcesso } from "@/lib/prazos";
+import { HOJE_REF } from "@/data/seed";
+import {
+  AREAS,
+  PROCEDIMENTO_MANUAL,
+  procedimentosDe,
+  buscarProcedimento,
+  descreverRegra,
+  calcularVencimento,
+  type AreaProcesso,
+  type Contagem,
+  type RegraContagem,
+} from "@/lib/prazos";
 import { diasUteisAte, classificarUrgencia } from "@/lib/businessDays";
 import { maskNumeroCNJ, validarNumeroCNJ } from "@/lib/validators";
 import { formatarData, diasUteisLabel } from "@/lib/format";
@@ -25,7 +35,17 @@ export function ProcessoForm() {
   const [numero, setNumero] = useState(existente?.numero ?? "");
   const [clienteId, setClienteId] = useState(existente?.clienteId ?? clientes[0]?.id ?? "");
   const [area, setArea] = useState<AreaProcesso>(existente?.area ?? "Cível");
-  const [tipo, setTipo] = useState(existente?.tipo ?? tiposProcesso[0]);
+
+  // Select em cascata: o procedimento vem do catálogo do ramo escolhido ou,
+  // quando não listado, da opção "Outros / Inserção Manual".
+  const tipoNoCatalogo = existente ? buscarProcedimento(existente.area, existente.tipo) : undefined;
+  const [procedimento, setProcedimento] = useState<string>(
+    existente ? (tipoNoCatalogo ? existente.tipo : PROCEDIMENTO_MANUAL) : "Petição Inicial",
+  );
+  const [manualNome, setManualNome] = useState(existente && !tipoNoCatalogo ? existente.tipo : "");
+  const [manualDias, setManualDias] = useState("");
+  const [manualContagem, setManualContagem] = useState<Contagem>("uteis");
+
   const [vara, setVara] = useState(existente?.vara ?? "");
   const [objeto, setObjeto] = useState(existente?.objeto ?? "");
   const [valor, setValor] = useState(String(existente?.valor ?? ""));
@@ -36,12 +56,39 @@ export function ProcessoForm() {
   const [status, setStatus] = useState(existente?.status ?? "Em andamento");
   const [erros, setErros] = useState<Record<string, string>>({});
 
+  const catalogo = useMemo(() => procedimentosDe(area), [area]);
+  const ehManual = procedimento === PROCEDIMENTO_MANUAL;
+  const itemCatalogo = ehManual ? undefined : buscarProcedimento(area, procedimento);
+
+  /** Nome efetivo da peça/procedimento persistido no processo. */
+  const tipo = ehManual ? manualNome.trim() : procedimento;
   const ehPeticaoInicial = tipo === "Petição Inicial";
 
-  // Regra legal sugerida para o par tipo × área (pode não existir → manual).
-  const regra = useMemo(() => regraPrazo(tipo, area), [tipo, area]);
+  // Ao trocar o ramo, mantém o procedimento se ele existir no novo catálogo.
+  const trocarArea = (nova: AreaProcesso) => {
+    setArea(nova);
+    if (!ehManual && !buscarProcedimento(nova, procedimento)) {
+      setProcedimento(procedimentosDe(nova)[0]?.nome ?? PROCEDIMENTO_MANUAL);
+    }
+  };
+
+  // Regra de contagem efetiva: do catálogo ou dos campos manuais.
+  const regra = useMemo<RegraContagem>(() => {
+    if (itemCatalogo) return itemCatalogo;
+    const n = Number(manualDias);
+    return {
+      quantidade: Number.isInteger(n) && n > 0 ? n : null,
+      unidade: "dias",
+      contagem: manualContagem,
+    };
+  }, [itemCatalogo, manualDias, manualContagem]);
+
+  const fundamento = itemCatalogo
+    ? itemCatalogo.obs
+    : "Procedimento informado manualmente — confira o prazo e a forma de contagem na legislação aplicável.";
+
   const prazoCalculado = useMemo(
-    () => calcularPrazoSugerido(termoInicial, regra),
+    () => calcularVencimento(termoInicial, regra),
     [termoInicial, regra],
   );
 
@@ -77,6 +124,10 @@ export function ProcessoForm() {
           e.termoInicial = `Fora da cronologia do processo: o primeiro registro deste número tem termo inicial em ${formatarData(primeiro.termoInicial)}. O novo lançamento deve ser posterior.`;
         }
       }
+    }
+
+    if (ehManual && manualNome.trim().length < 3) {
+      e.procedimento = "Informe o nome do procedimento (mínimo de 3 caracteres).";
     }
 
     // 2. Vara obrigatória, exceto para Petição Inicial.
@@ -158,7 +209,7 @@ export function ProcessoForm() {
                 />
                 {erroDe("numero")}
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <label className="label">Cliente vinculado</label>
                 <select value={clienteId} onChange={(e) => setClienteId(e.target.value)} className="input">
                   {clientes.map((c) => (
@@ -170,21 +221,66 @@ export function ProcessoForm() {
                 {erroDe("clienteId")}
               </div>
               <div>
-                <label className="label">Área do processo</label>
-                <select value={area} onChange={(e) => setArea(e.target.value as AreaProcesso)} className="input">
+                <label className="label">Ramo do Direito</label>
+                <select value={area} onChange={(e) => trocarArea(e.target.value as AreaProcesso)} className="input">
                   {AREAS.map((a) => (
                     <option key={a}>{a}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="label">Peça / Procedimento</label>
-                <select value={tipo} onChange={(e) => setTipo(e.target.value)} className="input">
-                  {tiposProcesso.map((t) => (
-                    <option key={t}>{t}</option>
+                <label className="label">Procedimento / Recurso</label>
+                <select
+                  value={procedimento}
+                  onChange={(e) => setProcedimento(e.target.value)}
+                  className="input"
+                >
+                  {catalogo.map((p) => (
+                    <option key={p.nome} value={p.nome}>
+                      {p.nome}
+                      {p.quantidade !== null && ` — ${descreverRegra(p)}`}
+                    </option>
                   ))}
+                  <option value={PROCEDIMENTO_MANUAL}>Outros / Inserção Manual</option>
                 </select>
               </div>
+              {ehManual && (
+                <>
+                  <div className="sm:col-span-2 grid gap-4 sm:grid-cols-3">
+                    <div className="sm:col-span-2">
+                      <label className="label">Nome do procedimento</label>
+                      <input
+                        value={manualNome}
+                        onChange={(e) => setManualNome(e.target.value)}
+                        maxLength={80}
+                        placeholder="Ex.: Impugnação ao cumprimento de sentença"
+                        className="input"
+                      />
+                      {erroDe("procedimento")}
+                    </div>
+                    <div>
+                      <label className="label">Prazo (dias)</label>
+                      <div className="flex gap-2">
+                        <input
+                          value={manualDias}
+                          onChange={(e) => setManualDias(e.target.value.replace(/[^\d]/g, "").slice(0, 3))}
+                          inputMode="numeric"
+                          placeholder="15"
+                          className="input w-20"
+                        />
+                        <select
+                          value={manualContagem}
+                          onChange={(e) => setManualContagem(e.target.value as Contagem)}
+                          className="input flex-1"
+                        >
+                          <option value="uteis">úteis</option>
+                          <option value="corridos">corridos</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
               <div>
                 <label className="label">
                   Vara / Foro {ehPeticaoInicial && <span className="normal-case text-muted">(opcional na petição inicial)</span>}
@@ -226,20 +322,30 @@ export function ProcessoForm() {
           <section className="card p-6">
             <h3 className="text-lg">Contagem de prazo</h3>
             <p className="text-sm text-muted">
-              A regra legal é sugerida conforme a área e a peça escolhidas — dias úteis ou corridos.
-              Você sempre pode definir a data de referência manualmente.
+              O prazo e a forma de contagem seguem o procedimento selecionado. A data de referência
+              pode ser definida manualmente a qualquer momento.
             </p>
 
-            {/* Regra sugerida para o par área × peça */}
-            <div className="mt-4 flex items-start gap-3 rounded-xl bg-medio-bg p-4">
-              <Scale size={16} className="mt-0.5 shrink-0 text-medio" />
-              <div className="text-sm text-body">
-                <strong>
-                  {area} · {tipo}:
-                </strong>{" "}
-                {prazoCalculado === null ? "sem contagem automática" : descreveRegra(regra)}
-                <p className="mt-1 text-xs text-body-2">{regra.obs}</p>
+            {/* Quadro da regra de contagem aplicável ao procedimento */}
+            <div className="mt-4 overflow-hidden rounded-xl border border-line">
+              <div className="flex items-center gap-2 border-b border-line bg-canvas px-4 py-2.5">
+                <Clock size={14} className="text-muted" />
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
+                  Regra de contagem aplicável
+                </span>
               </div>
+              <dl className="grid gap-y-1.5 px-4 py-3 text-sm sm:grid-cols-[120px,1fr] sm:gap-x-4">
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted sm:pt-0.5">Procedimento</dt>
+                <dd className="font-medium text-body">
+                  {tipo || "—"} <span className="font-normal text-muted">· {area}</span>
+                </dd>
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted sm:pt-0.5">Prazo</dt>
+                <dd className="font-medium text-body">
+                  {regra.quantidade === null ? "Sem contagem automática — referência manual" : descreverRegra(regra)}
+                </dd>
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted sm:pt-0.5">Fundamento</dt>
+                <dd className="text-body-2">{fundamento}</dd>
+              </dl>
             </div>
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -265,7 +371,7 @@ export function ProcessoForm() {
                 className="accent-gold"
               />
               <label htmlFor="auto" className={`text-sm ${prazoCalculado === null ? "text-muted" : "text-body"}`}>
-                Usar prazo calculado ({descreveRegra(regra)}):{" "}
+                Usar prazo calculado ({descreverRegra(regra)}):{" "}
                 <strong>{prazoCalculado ? formatarData(prazoCalculado) : "—"}</strong>
               </label>
               <span className="mx-2 hidden h-4 w-px bg-line-2 sm:block" />
