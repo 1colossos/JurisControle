@@ -46,6 +46,8 @@ export interface Cliente {
   estadoCivil?: EstadoCivil; // apenas pessoa física
   endereco: string; // domicílio do cliente
   portalToken: string; // token de acesso ao Portal do Cliente, gerado pelo escritório
+  /** Foto de perfil em Data URL (Base64) — payload pronto para a futura API REST. */
+  foto?: string;
 }
 
 export type StatusProcesso = "Em andamento" | "Suspenso" | "Arquivado";

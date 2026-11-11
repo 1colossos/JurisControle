@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Search, Plus, Mail, Phone, MapPin, FileSignature, ScrollText, KeyRound } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Search, Plus, Mail, Phone, MapPin, FileSignature, ScrollText, KeyRound, Camera, Trash2 } from "lucide-react";
 import { useApp } from "@/store/AppContext";
 import { useToast } from "@/components/ui/Toast";
 import { gerarDocumentoPdf, DOCUMENTO_LABEL, type TipoDocumento } from "@/lib/documentos";
@@ -29,6 +29,8 @@ interface FormCliente {
   tel: string;
   estadoCivil: EstadoCivil | "";
   endereco: string;
+  /** Foto de perfil em Data URL (Base64) — pronta para envio à API REST. */
+  foto: string;
 }
 
 const vazio: FormCliente = {
@@ -39,7 +41,11 @@ const vazio: FormCliente = {
   tel: "",
   estadoCivil: "",
   endereco: "",
+  foto: "",
 };
+
+/** Tamanho máximo da foto de perfil (2 MB). */
+const FOTO_MAX_BYTES = 2 * 1024 * 1024;
 
 export function Clientes() {
   const { clientes, addCliente, updateCliente, processosPorCliente, usuario } = useApp();
@@ -85,10 +91,32 @@ export function Clientes() {
       tel: c.tel,
       estadoCivil: c.estadoCivil ?? "",
       endereco: c.endereco,
+      foto: c.foto ?? "",
     });
     setErros({});
     setEditId(c.id);
     setAberto(true);
+  };
+
+  const fotoInputRef = useRef<HTMLInputElement>(null);
+
+  /** Lê a imagem escolhida e converte para Data URL (Base64) — o mesmo
+      payload que seguirá no JSON do POST/PUT da futura API REST. */
+  const escolherFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const arquivo = e.target.files?.[0];
+    e.target.value = ""; // permite reenviar o mesmo arquivo
+    if (!arquivo) return;
+    if (!arquivo.type.startsWith("image/")) {
+      toast("Envie um arquivo de imagem (JPG, PNG ou WebP).", "warning");
+      return;
+    }
+    if (arquivo.size > FOTO_MAX_BYTES) {
+      toast("A foto deve ter no máximo 2 MB.", "warning");
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = () => setForm((f) => ({ ...f, foto: String(leitor.result ?? "") }));
+    leitor.readAsDataURL(arquivo);
   };
 
   const setTipo = (tipo: TipoCliente) =>
@@ -126,6 +154,7 @@ export function Clientes() {
       tel: form.tel,
       estadoCivil: form.tipo === "PF" && form.estadoCivil ? form.estadoCivil : undefined,
       endereco: form.endereco.trim(),
+      foto: form.foto || undefined,
     };
     if (editId) {
       updateCliente(editId, dados);
@@ -192,9 +221,17 @@ export function Clientes() {
                 >
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-10 w-10 place-items-center rounded-full bg-navy-900 text-xs font-semibold text-white">
-                        {iniciais(c.nome)}
-                      </span>
+                      {c.foto ? (
+                        <img
+                          src={c.foto}
+                          alt={`Foto de ${c.nome}`}
+                          className="h-10 w-10 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-10 w-10 place-items-center rounded-full bg-navy-900 text-xs font-semibold text-white">
+                          {iniciais(c.nome)}
+                        </span>
+                      )}
                       <div>
                         <span className="font-medium text-body">{c.nome}</span>
                         {c.estadoCivil && (
@@ -283,6 +320,44 @@ export function Clientes() {
         }
       >
         <form id="form-cliente" onSubmit={salvar} className="grid gap-4 sm:grid-cols-2" noValidate>
+          {/* Foto de perfil — upload com pré-visualização (Base64 no payload) */}
+          <div className="sm:col-span-2 flex items-center gap-4">
+            {form.foto ? (
+              <img
+                src={form.foto}
+                alt="Pré-visualização da foto de perfil"
+                className="h-16 w-16 shrink-0 rounded-full border border-line object-cover"
+              />
+            ) : (
+              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-navy-900 text-sm font-semibold text-white">
+                {form.nome.trim() ? iniciais(form.nome) : <Camera size={20} className="text-white/70" />}
+              </span>
+            )}
+            <div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => fotoInputRef.current?.click()} className="btn-ghost">
+                  <Camera size={14} /> {form.foto ? "Trocar foto" : "Enviar foto"}
+                </button>
+                {form.foto && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, foto: "" }))}
+                    className="btn-ghost text-critico"
+                  >
+                    <Trash2 size={14} /> Remover
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-muted">JPG, PNG ou WebP · máx. 2 MB</p>
+            </div>
+            <input
+              ref={fotoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={escolherFoto}
+              className="hidden"
+            />
+          </div>
           <div className="sm:col-span-2">
             <label className="label">{form.tipo === "PJ" ? "Razão social" : "Nome completo"}</label>
             <input
