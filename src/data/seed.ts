@@ -6,6 +6,7 @@
    ============================================================ */
 
 import type { AreaProcesso } from "@/lib/prazos";
+import { validarCPF, validarCNPJ } from "@/lib/validators";
 
 /** Data de referência da demonstração (mantém os prazos significativos). */
 export const HOJE_REF = "2026-06-12";
@@ -96,12 +97,22 @@ export const usuario: Usuario = {
 };
 
 export const clientes: Cliente[] = [
-  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-90", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Luís - MA", portalToken: "AURORA-26" },
+  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-95", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Luís - MA", portalToken: "AURORA-26" },
   { id: "c2", nome: "Marina Vasconcelos", doc: "123.456.789-09", email: "marina.v@email.com", tel: "(11) 98877-6655", tipo: "PF", estadoCivil: "Casado(a)", endereco: "Itapecuru Mirim - MA", portalToken: "MARINA-26" },
   { id: "c3", nome: "Pedro Henrique Sales", doc: "987.654.321-00", email: "pedrohs@gmail.com", tel: "(11) 99988-1122", tipo: "PF", estadoCivil: "Solteiro(a)", endereco: "Itapeucur Mirim - MA", portalToken: "PEDRO-26" },
-  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-10", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Imperatriz - MA", portalToken: "TECH-26" },
-  { id: "c5", nome: "Família Antunes", doc: "456.789.123-00", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Itapecuru Mirim - MA", portalToken: "ANTUNES-26" },
+  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-98", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Imperatriz - MA", portalToken: "TECH-26" },
+  { id: "c5", nome: "Família Antunes", doc: "456.789.123-64", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Itapecuru Mirim - MA", portalToken: "ANTUNES-26" },
 ];
+
+// Sanidade do mock: o seed entra direto no estado (não passa pelo formulário,
+// onde validarCPF/CNPJ rodam), então os documentos são conferidos aqui em
+// desenvolvimento para nenhum CPF/CNPJ inválido passar despercebido.
+if (import.meta.env.DEV) {
+  for (const c of clientes) {
+    const ok = c.tipo === "PF" ? validarCPF(c.doc) : validarCNPJ(c.doc);
+    if (!ok) console.warn(`[seed] ${c.tipo === "PF" ? "CPF" : "CNPJ"} inválido para "${c.nome}": ${c.doc}`);
+  }
+}
 
 const timelinePadrao: EventoTimeline[] = [
   { data: "2024-02-10", titulo: "Distribuição", desc: "Processo distribuído para a vara competente.", done: true },
