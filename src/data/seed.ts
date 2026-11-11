@@ -115,12 +115,12 @@ const arquivosPadrao: Arquivo[] = [
 ];
 
 export const processos: Processo[] = [
-  { id: "p1", numero: "0001234-56.2024.8.26.0100", clienteId: "c1", area: "Cível", tipo: "Contestação/Defesa", vara: "3ª Vara Cível - MA", prazo: "2026-06-13", termoInicial: "2026-06-01", status: "Em andamento", objeto: "Ação de cobrança — débitos de obra", valor: 25000, lembretes: [1, 3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p2", numero: "0009876-54.2024.5.02.0070", clienteId: "c2", area: "Trabalhista", tipo: "Recursos", vara: "70ª Vara do Trabalho - MA", prazo: "2026-06-16", termoInicial: "2026-06-02", status: "Em andamento", objeto: "Reclamação trabalhista — verbas rescisórias", valor: 48300, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p3", numero: "0004567-89.2023.8.26.0011", clienteId: "c3", area: "Cível", tipo: "Réplica/Impugnação", vara: "11ª Vara Cível - MA", prazo: "2026-06-22", termoInicial: "2026-06-05", status: "Em andamento", objeto: "Ação de indenização por danos morais", valor: 15000, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p4", numero: "0007890-12.2024.8.26.0224", clienteId: "c4", area: "Empresarial", tipo: "Memoriais/Alegações Finais", vara: "2ª Vara Empresarial - MA", prazo: "2026-07-01", termoInicial: "2026-06-10", status: "Em andamento", objeto: "Dissolução parcial de sociedade", valor: 320000, lembretes: [7, 15], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p5", numero: "0002345-67.2025.8.26.0053", clienteId: "c5", area: "Cível", tipo: "Contrarrazões", vara: "5ª Vara de Família - MA", prazo: "2026-06-15", termoInicial: "2026-06-03", status: "Em andamento", objeto: "Ação de alimentos", valor: 36000, lembretes: [1, 3], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p6", numero: "0008765-43.2024.4.03.6100", clienteId: "c4", area: "Tributária", tipo: "Embargos", vara: "8ª Vara Federal - MA", prazo: "2026-06-26", termoInicial: "2026-06-08", status: "Suspenso", objeto: "Embargos à execução fiscal", valor: 92450, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p1", numero: "0001234-56.2024.8.26.0100", clienteId: "c1", area: "Cível", tipo: "Contestação", vara: "3ª Vara Cível - MA", prazo: "2026-06-13", termoInicial: "2026-06-01", status: "Em andamento", objeto: "Ação de cobrança — débitos de obra", valor: 25000, lembretes: [1, 3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p2", numero: "0009876-54.2024.5.02.0070", clienteId: "c2", area: "Trabalhista", tipo: "Recurso Ordinário", vara: "70ª Vara do Trabalho - MA", prazo: "2026-06-16", termoInicial: "2026-06-02", status: "Em andamento", objeto: "Reclamação trabalhista — verbas rescisórias", valor: 48300, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p3", numero: "0004567-89.2023.8.26.0011", clienteId: "c3", area: "Cível", tipo: "Réplica / Impugnação à Contestação", vara: "11ª Vara Cível - MA", prazo: "2026-06-22", termoInicial: "2026-06-05", status: "Em andamento", objeto: "Ação de indenização por danos morais", valor: 15000, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p4", numero: "0007890-12.2024.8.26.0224", clienteId: "c4", area: "Empresarial", tipo: "Memoriais / Alegações Finais", vara: "2ª Vara Empresarial - MA", prazo: "2026-07-01", termoInicial: "2026-06-10", status: "Em andamento", objeto: "Dissolução parcial de sociedade", valor: 320000, lembretes: [7, 15], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p5", numero: "0002345-67.2025.8.26.0053", clienteId: "c5", area: "Cível", tipo: "Contrarrazões de Apelação", vara: "5ª Vara de Família - MA", prazo: "2026-06-15", termoInicial: "2026-06-03", status: "Em andamento", objeto: "Ação de alimentos", valor: 36000, lembretes: [1, 3], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p6", numero: "0008765-43.2024.4.03.6100", clienteId: "c4", area: "Tributária", tipo: "Embargos à Execução Fiscal", vara: "8ª Vara Federal - MA", prazo: "2026-06-26", termoInicial: "2026-06-08", status: "Suspenso", objeto: "Embargos à execução fiscal", valor: 92450, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
 ];
 
 export const notificacoes = [
@@ -202,17 +202,4 @@ export const transacoes: TransacaoFinanceira[] = [
   { id: "t35", descricao: "Diligência — perícia contábil (adiantamento)", tipo: "custas_processuais", categoria: "diligencia", valor: 540, dataVencimento: "2026-04-15", dataPagamento: "2026-04-16", status: "pago", clienteId: "c4", processoId: "p4" },
   { id: "t36", descricao: "Diligência — deslocamento audiência", tipo: "custas_processuais", categoria: "diligencia", valor: 380, dataVencimento: "2026-05-20", dataPagamento: "2026-05-20", status: "pago", clienteId: "c2", processoId: "p2" },
   { id: "t37", descricao: "Diligência — guia de custas recursais", tipo: "custas_processuais", categoria: "diligencia", valor: 310, dataVencimento: "2026-06-18", status: "pendente", clienteId: "c1", processoId: "p1" },
-];
-
-export const tiposProcesso = [
-  "Petição Inicial",
-  "Contestação/Defesa",
-  "Contrarrazões",
-  "Réplica/Impugnação",
-  "Memoriais/Alegações Finais",
-  "Recursos",
-  "Embargos",
-  "Apelação",
-  "Agravo de Instrumento",
-  "Outro/Manifestação",
 ];

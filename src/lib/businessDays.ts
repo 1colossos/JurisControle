@@ -74,11 +74,16 @@ const isoKey = (d: Date) =>
     d.getDate(),
   ).padStart(2, "0")}`;
 
-/** True se a data é dia útil forense (não é fim de semana, feriado ou suspensão). */
-export function ehDiaUtil(d: Date): boolean {
+/**
+ * True se a data é dia útil forense (não é fim de semana, feriado ou suspensão).
+ * `feriadosExtras` permite acrescentar feriados locais pontuais (AAAA-MM-DD)
+ * informados pelo usuário, sem alterar o calendário-base do sistema.
+ */
+export function ehDiaUtil(d: Date, feriadosExtras: readonly string[] = []): boolean {
   const dow = d.getDay();
   if (dow === 0 || dow === 6) return false; // domingo/sábado
   if (SUSPENSOES.has(isoKey(d))) return false;
+  if (feriadosExtras.includes(isoKey(d))) return false;
   const mmdd = key(d);
   if (FERIADOS_NACIONAIS_FIXOS.includes(mmdd)) return false;
   if (FERIADOS_REGIONAIS_FIXOS.includes(mmdd)) return false;
@@ -123,12 +128,16 @@ export function classificarUrgencia(diasUteis: number): Urgencia {
 }
 
 /** Soma N dias úteis a uma data inicial (ex.: termo inicial + prazo legal). */
-export function somarDiasUteis(inicioISO: string, dias: number): string {
+export function somarDiasUteis(
+  inicioISO: string,
+  dias: number,
+  feriadosExtras: readonly string[] = [],
+): string {
   let cursor = parseISO(inicioISO);
   let restantes = dias;
   while (restantes > 0) {
     cursor = addDays(cursor, 1);
-    if (ehDiaUtil(cursor)) restantes--;
+    if (ehDiaUtil(cursor, feriadosExtras)) restantes--;
   }
   return isoKey(cursor);
 }
@@ -137,8 +146,29 @@ export function somarDiasUteis(inicioISO: string, dias: number): string {
  * Soma N dias CORRIDOS a uma data inicial (prazos penais). Se o vencimento
  * cair em dia não útil, prorroga para o primeiro dia útil seguinte.
  */
-export function somarDiasCorridos(inicioISO: string, dias: number): string {
+export function somarDiasCorridos(
+  inicioISO: string,
+  dias: number,
+  feriadosExtras: readonly string[] = [],
+): string {
   let cursor = addDays(parseISO(inicioISO), dias);
-  while (!ehDiaUtil(cursor)) cursor = addDays(cursor, 1);
+  while (!ehDiaUtil(cursor, feriadosExtras)) cursor = addDays(cursor, 1);
+  return isoKey(cursor);
+}
+
+/**
+ * Soma N meses civis (prazos decadenciais, ex.: queixa-crime, ação rescisória
+ * em anos = 12×N). Ajusta o fim de mês (31/01 + 1 mês → 28/02) e, se o
+ * vencimento cair em dia não útil, prorroga para o primeiro dia útil seguinte.
+ */
+export function somarMeses(
+  inicioISO: string,
+  meses: number,
+  feriadosExtras: readonly string[] = [],
+): string {
+  const inicio = parseISO(inicioISO);
+  let cursor = new Date(inicio.getFullYear(), inicio.getMonth() + meses, inicio.getDate());
+  if (cursor.getDate() !== inicio.getDate()) cursor = new Date(cursor.getFullYear(), cursor.getMonth(), 0);
+  while (!ehDiaUtil(cursor, feriadosExtras)) cursor = addDays(cursor, 1);
   return isoKey(cursor);
 }
