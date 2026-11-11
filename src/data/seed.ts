@@ -86,7 +86,7 @@ export const usuario: Usuario = {
   nome: "Dr. Afonso Ferreira",
   oab: "OAB/MA 123.456",
   email: "afonso@ferreiraadvogados.com.br",
-  telefone: "(11) 99988-7766",
+  telefone: "(98) 99999-8888",
   escritorio: "Ferreira & Associados Advocacia",
   uf: "MA",
   dataNascimento: "2005-10-20",
