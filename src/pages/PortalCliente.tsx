@@ -79,7 +79,7 @@ export function PortalLogin() {
           <Logo size={64} />
           <h1 className="mt-4 text-2xl">Portal do Cliente</h1>
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-gold">
-            Carvalho &amp; Associados
+            Ferreira &amp; Associados
           </p>
         </div>
 

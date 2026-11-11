@@ -76,7 +76,7 @@ function corpoContrato(c: Cliente, u: Usuario): string {
   <p><strong>CLÁUSULA 4ª — DA VIGÊNCIA E RESCISÃO.</strong> O contrato vigora até o trânsito em julgado ou a
   solução definitiva da matéria. Em caso de revogação do mandato, serão devidos os honorários proporcionais
   ao trabalho realizado.</p>
-  <p><strong>CLÁUSULA 5ª — DO FORO.</strong> Fica eleito o foro da comarca de São Paulo - SP para dirimir
+  <p><strong>CLÁUSULA 5ª — DO FORO.</strong> Fica eleito o foro da comarca de SÃO LUÍS - MA para dirimir
   quaisquer controvérsias oriundas deste contrato.</p>`;
 }
 
@@ -115,8 +115,8 @@ export function gerarPixCopiaECola(t: TransacaoFinanceira): string {
   const valor = t.valor.toFixed(2);
   const txid = `JC${t.id.toUpperCase().padEnd(10, "0")}`;
   return (
-    `00020126580014br.gov.bcb.pix0136financeiro@carvalhoadvogados.com.br520400005303986` +
-    `54${String(valor.length).padStart(2, "0")}${valor}5802BR5925CARVALHO ASSOCIADOS ADV6009SAO PAULO62${String(
+    `00020126580014br.gov.bcb.pix0136financeiro@ferreiraaadvogados.com.br520400005303986` +
+    `54${String(valor.length).padStart(2, "0")}${valor}5802BR5925FERREIRA & ASSOCIADOS ADV6009SAO PAULO62${String(
       (`05${String(txid.length).padStart(2, "0")}${txid}`).length,
     ).padStart(2, "0")}05${String(txid.length).padStart(2, "0")}${txid}6304ABCD`
   );
@@ -147,8 +147,8 @@ export function baixarBoletoPdf(t: TransacaoFinanceira, cliente: Cliente): boole
 </head>
 <body>
   <div class="boleto">
-    <h1>Carvalho &amp; Associados Advocacia</h1>
-    <div>Beneficiário: Carvalho &amp; Associados — CNPJ 00.000.000/0001-00</div>
+    <h1>Ferreira &amp; Associados Advocacia</h1>
+    <div>Beneficiário: Ferreira &amp; Associados — CNPJ 00.000.000/0001-00</div>
     <div class="linha-dig">${linha}</div>
     <div class="grid">
       <div class="campo"><b>Pagador</b>${esc(cliente.nome)}<br/>${esc(cliente.doc)}</div>

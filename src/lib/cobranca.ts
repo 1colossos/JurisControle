@@ -46,14 +46,14 @@ function montarMensagem(t: TransacaoFinanceira, cliente: Cliente | undefined, mo
     return (
       `Olá, ${nome}! Tudo bem? Passando para lembrar que a cobrança "${t.descricao}" ` +
       `no valor de ${valor} vence em ${venc}. Qualquer dúvida, estamos à disposição. ` +
-      `— Carvalho & Associados Advocacia`
+      `— Ferreira & Associados Advocacia`
     );
   }
   return (
     `Olá, ${nome}! Notamos que a cobrança "${t.descricao}" no valor de ${valor}, ` +
     `com vencimento em ${venc}, ainda consta em aberto. Se o pagamento já foi feito, ` +
     `desconsidere esta mensagem; caso contrário, podemos ajudar com uma nova via. ` +
-    `— Carvalho & Associados Advocacia`
+    `— Ferreira & Associados Advocacia`
   );
 }
 

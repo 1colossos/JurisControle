@@ -83,22 +83,22 @@ export interface Processo {
 }
 
 export const usuario: Usuario = {
-  nome: "Dra. Helena Carvalho",
-  oab: "OAB/SP 123.456",
-  email: "helena@carvalhoadvogados.com.br",
+  nome: "Dr. Afonso Ferreira",
+  oab: "OAB/MA 123.456",
+  email: "afonso@ferreiraadvogados.com.br",
   telefone: "(11) 99988-7766",
-  escritorio: "Carvalho & Associados Advocacia",
-  uf: "SP",
-  dataNascimento: "1988-03-14",
-  areas: ["Civil", "Trabalhista", "Empresarial"],
+  escritorio: "Ferreira & Associados Advocacia",
+  uf: "MA",
+  dataNascimento: "2005-10-20",
+  areas: ["Civil", "Penal", "Empresarial"],
 };
 
 export const clientes: Cliente[] = [
-  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-90", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Paulo - SP", portalToken: "AURORA-26" },
-  { id: "c2", nome: "Marina Vasconcelos", doc: "123.456.789-09", email: "marina.v@email.com", tel: "(11) 98877-6655", tipo: "PF", estadoCivil: "Casado(a)", endereco: "Guarulhos - SP", portalToken: "MARINA-26" },
-  { id: "c3", nome: "Pedro Henrique Sales", doc: "987.654.321-00", email: "pedrohs@gmail.com", tel: "(11) 99988-1122", tipo: "PF", estadoCivil: "Solteiro(a)", endereco: "São Paulo - SP", portalToken: "PEDRO-26" },
-  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-10", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Barueri - SP", portalToken: "TECH-26" },
-  { id: "c5", nome: "Família Antunes", doc: "456.789.123-00", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Osasco - SP", portalToken: "ANTUNES-26" },
+  { id: "c1", nome: "Construtora Aurora Ltda.", doc: "12.345.678/0001-90", email: "contato@aurora.com.br", tel: "(11) 3344-5566", tipo: "PJ", endereco: "São Luís - MA", portalToken: "AURORA-26" },
+  { id: "c2", nome: "Marina Vasconcelos", doc: "123.456.789-09", email: "marina.v@email.com", tel: "(11) 98877-6655", tipo: "PF", estadoCivil: "Casado(a)", endereco: "Itapecuru Mirim - MA", portalToken: "MARINA-26" },
+  { id: "c3", nome: "Pedro Henrique Sales", doc: "987.654.321-00", email: "pedrohs@gmail.com", tel: "(11) 99988-1122", tipo: "PF", estadoCivil: "Solteiro(a)", endereco: "Itapeucur Mirim - MA", portalToken: "PEDRO-26" },
+  { id: "c4", nome: "Tech Holding S.A.", doc: "98.765.432/0001-10", email: "juridico@techholding.com", tel: "(11) 4002-8922", tipo: "PJ", endereco: "Imperatriz - MA", portalToken: "TECH-26" },
+  { id: "c5", nome: "Família Antunes", doc: "456.789.123-00", email: "antunes.familia@email.com", tel: "(11) 97766-3344", tipo: "PF", estadoCivil: "Viúvo(a)", endereco: "Itapecuru Mirim - MA", portalToken: "ANTUNES-26" },
 ];
 
 const timelinePadrao: EventoTimeline[] = [
@@ -115,12 +115,12 @@ const arquivosPadrao: Arquivo[] = [
 ];
 
 export const processos: Processo[] = [
-  { id: "p1", numero: "0001234-56.2024.8.26.0100", clienteId: "c1", area: "Cível", tipo: "Contestação/Defesa", vara: "3ª Vara Cível - SP", prazo: "2026-06-13", termoInicial: "2026-06-01", status: "Em andamento", objeto: "Ação de cobrança — débitos de obra", valor: 25000, lembretes: [1, 3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p2", numero: "0009876-54.2024.5.02.0070", clienteId: "c2", area: "Trabalhista", tipo: "Recursos", vara: "70ª Vara do Trabalho - SP", prazo: "2026-06-16", termoInicial: "2026-06-02", status: "Em andamento", objeto: "Reclamação trabalhista — verbas rescisórias", valor: 48300, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p3", numero: "0004567-89.2023.8.26.0011", clienteId: "c3", area: "Cível", tipo: "Réplica/Impugnação", vara: "11ª Vara Cível - SP", prazo: "2026-06-22", termoInicial: "2026-06-05", status: "Em andamento", objeto: "Ação de indenização por danos morais", valor: 15000, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p4", numero: "0007890-12.2024.8.26.0224", clienteId: "c4", area: "Empresarial", tipo: "Memoriais/Alegações Finais", vara: "2ª Vara Empresarial - SP", prazo: "2026-07-01", termoInicial: "2026-06-10", status: "Em andamento", objeto: "Dissolução parcial de sociedade", valor: 320000, lembretes: [7, 15], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p5", numero: "0002345-67.2025.8.26.0053", clienteId: "c5", area: "Cível", tipo: "Contrarrazões", vara: "5ª Vara de Família - SP", prazo: "2026-06-15", termoInicial: "2026-06-03", status: "Em andamento", objeto: "Ação de alimentos", valor: 3600, lembretes: [1, 3], timeline: timelinePadrao, arquivos: arquivosPadrao },
-  { id: "p6", numero: "0008765-43.2024.4.03.6100", clienteId: "c4", area: "Tributária", tipo: "Embargos", vara: "8ª Vara Federal - SP", prazo: "2026-06-26", termoInicial: "2026-06-08", status: "Suspenso", objeto: "Embargos à execução fiscal", valor: 92450, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p1", numero: "0001234-56.2024.8.26.0100", clienteId: "c1", area: "Cível", tipo: "Contestação/Defesa", vara: "3ª Vara Cível - MA", prazo: "2026-06-13", termoInicial: "2026-06-01", status: "Em andamento", objeto: "Ação de cobrança — débitos de obra", valor: 25000, lembretes: [1, 3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p2", numero: "0009876-54.2024.5.02.0070", clienteId: "c2", area: "Trabalhista", tipo: "Recursos", vara: "70ª Vara do Trabalho - MA", prazo: "2026-06-16", termoInicial: "2026-06-02", status: "Em andamento", objeto: "Reclamação trabalhista — verbas rescisórias", valor: 48300, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p3", numero: "0004567-89.2023.8.26.0011", clienteId: "c3", area: "Cível", tipo: "Réplica/Impugnação", vara: "11ª Vara Cível - MA", prazo: "2026-06-22", termoInicial: "2026-06-05", status: "Em andamento", objeto: "Ação de indenização por danos morais", valor: 15000, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p4", numero: "0007890-12.2024.8.26.0224", clienteId: "c4", area: "Empresarial", tipo: "Memoriais/Alegações Finais", vara: "2ª Vara Empresarial - MA", prazo: "2026-07-01", termoInicial: "2026-06-10", status: "Em andamento", objeto: "Dissolução parcial de sociedade", valor: 320000, lembretes: [7, 15], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p5", numero: "0002345-67.2025.8.26.0053", clienteId: "c5", area: "Cível", tipo: "Contrarrazões", vara: "5ª Vara de Família - MA", prazo: "2026-06-15", termoInicial: "2026-06-03", status: "Em andamento", objeto: "Ação de alimentos", valor: 36000, lembretes: [1, 3], timeline: timelinePadrao, arquivos: arquivosPadrao },
+  { id: "p6", numero: "0008765-43.2024.4.03.6100", clienteId: "c4", area: "Tributária", tipo: "Embargos", vara: "8ª Vara Federal - MA", prazo: "2026-06-26", termoInicial: "2026-06-08", status: "Suspenso", objeto: "Embargos à execução fiscal", valor: 92450, lembretes: [3, 7], timeline: timelinePadrao, arquivos: arquivosPadrao },
 ];
 
 export const notificacoes = [
