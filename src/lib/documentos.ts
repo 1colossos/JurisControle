@@ -43,7 +43,7 @@ function qualificacao(c: Cliente): string {
 function qualificacaoAdvogada(u: Usuario): string {
   return `<strong>${esc(u.nome)}</strong>, advogada inscrita na ${esc(u.oab)}, com escritório profissional ${
     u.escritorio ? `(${esc(u.escritorio)}) ` : ""
-  }na cidade de São Paulo - ${esc(u.uf)}`;
+  }na cidade de São Luís - ${esc(u.uf)}`;
 }
 
 function corpoProcuracao(c: Cliente, u: Usuario): string {
@@ -94,7 +94,7 @@ export function gerarDocumentoPdf(tipo: TipoDocumento, cliente: Cliente, usuario
 </head>
 <body>
   ${corpo}
-  <p class="data">São Paulo, ${dataLonga}.</p>
+  <p class="data">São Luís, ${dataLonga}.</p>
   <div class="assinatura"><span class="linha">${esc(cliente.nome)}</span></div>
   <div class="assinatura"><span class="linha">${esc(usuario.nome)} — ${esc(usuario.oab)}</span></div>
   <footer>Documento gerado pelo JurisControle a partir do cadastro do cliente.</footer>

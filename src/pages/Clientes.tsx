@@ -441,7 +441,7 @@ export function Clientes() {
               value={form.endereco}
               onChange={(e) => setForm({ ...form, endereco: e.target.value })}
               maxLength={120}
-              placeholder="São Paulo - SP"
+              placeholder="São Luís - MA"
               className="input"
             />
             {campo("endereco")}
