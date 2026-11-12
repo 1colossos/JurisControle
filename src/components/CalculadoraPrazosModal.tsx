@@ -164,7 +164,7 @@ export function CalculadoraPrazosModal({ open, onClose }: { open: boolean; onClo
             value={feriadosTexto}
             onChange={(e) => setFeriadosTexto(e.target.value)}
             rows={3}
-            placeholder={"2026-06-24\n2026-07-09"}
+            placeholder={`${new Date().getFullYear() + 1}-06-24\n${new Date().getFullYear() + 1}-07-09`}
             className="input resize-none font-mono text-xs"
           />
           <p className="mt-1 text-xs text-muted">

@@ -16,9 +16,9 @@ export function formatarDataLonga(iso: string): string {
 }
 
 export function diasUteisLabel(dias: number): string {
-  if (dias < 0) return `${Math.abs(dias)} dia${Math.abs(dias) === 1 ? "" : "s"} vencido`;
+  if (dias < 0) return Math.abs(dias) === 1 ? "1 dia vencido" : `${Math.abs(dias)} dias vencidos`;
   if (dias === 0) return "vence hoje";
-  return `${dias} dia${dias === 1 ? "" : "s"} útil${dias === 1 ? "" : "eis"}`;
+  return dias === 1 ? "1 dia útil" : `${dias} dias úteis`;
 }
 
 export function moeda(valor: number): string {

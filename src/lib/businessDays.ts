@@ -20,8 +20,10 @@ const FERIADOS_NACIONAIS_FIXOS = [
 
 /** Feriados estaduais/municipais relevantes ao foro do projeto (MA). */
 const FERIADOS_REGIONAIS_FIXOS = [
-  "07-28", // Adesão do Maranhão à Independência
+  "07-28", // Adesão do Maranhão à Independência (estadual)
   "12-08", // Nossa Senhora da Conceição (padroeira de São Luís)
+  "07-21", // Aniversário de Itapecuru-Mirim
+  "09-15", // Nossa Senhora das Dores (padroeira de Itapecuru-Mirim, Lei Municipal 1.015/2006 — TJMA suspende o expediente do fórum)
 ];
 
 /** Suspensões de expediente forense cadastradas manualmente (AAAA-MM-DD). */
@@ -137,6 +139,21 @@ export function somarDiasUteis(
   let restantes = dias;
   while (restantes > 0) {
     cursor = addDays(cursor, 1);
+    if (ehDiaUtil(cursor, feriadosExtras)) restantes--;
+  }
+  return isoKey(cursor);
+}
+
+/** Retrocede N dias úteis a partir de uma data (ex.: gerar termos iniciais do mock). */
+export function subtrairDiasUteis(
+  inicioISO: string,
+  dias: number,
+  feriadosExtras: readonly string[] = [],
+): string {
+  let cursor = parseISO(inicioISO);
+  let restantes = dias;
+  while (restantes > 0) {
+    cursor = addDays(cursor, -1);
     if (ehDiaUtil(cursor, feriadosExtras)) restantes--;
   }
   return isoKey(cursor);
